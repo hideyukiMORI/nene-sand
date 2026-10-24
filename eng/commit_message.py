@@ -55,10 +55,12 @@ def current_branch() -> str:
 
 
 def commit_subjects() -> list[str]:
-    base = "origin/main"
-    verify = subprocess.run(["git", "rev-parse", "--verify", base], capture_output=True, text=True)
-    if verify.returncode != 0:
-        base = "main"
+    base = os.environ.get("BASE_SHA", "").strip()
+    if not base:
+        base = "origin/main"
+        verify = subprocess.run(["git", "rev-parse", "--verify", base], capture_output=True, text=True)
+        if verify.returncode != 0:
+            base = "main"
     output = git(["log", "--format=%s", f"{base}..HEAD"])
     return [line for line in output.splitlines() if line]
 
