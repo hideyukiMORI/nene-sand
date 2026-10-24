@@ -6,7 +6,7 @@
 検査は落ちることを見るまで信用しない。各仕込みは戻してから次を入れた。全部戻したあと、規約検査、単体テスト、コミット検査、整形、SwiftLint が終了 0 になり、続けて `make check` も終了 0 だった。
 
 環境: Linux x86_64、glibc 2.35、Swift 6.4.1、swift-format 6.4.1、SwiftLint 0.65.1 static
-CI: ubuntu-22.04。ジョブ名 `check`
+CI: ubuntu-22.04。ジョブ名 `check`。Ready 後の run 40105035976 は廃止された swiftly-install.sh が 404（curl 終了 22）で失敗した。導入は `eng/tool-versions.txt` の swiftly 1.2.0 tarball に替えた。この差し替え後の CI 結果は、その実行が終わるまで書かない
 
 ---
 

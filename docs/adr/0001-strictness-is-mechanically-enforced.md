@@ -43,7 +43,7 @@ NeNe Delve の Swift 列との突き合わせ: 8 項目とも判定は一致し�
 3. baseline を持たない。例外は期限付きの狭い waiver だけである
 4. 抑制には直前行の waiver ID を要求する。Swift は抑制を言語で封じられないので、台帳を持つ
 5. ゲートを弱める変更は ADR を要する
-6. Swift の版は `.swift-version` だけ、SwiftLint の版と zip の sha256 は `eng/tool-versions.txt` だけが決める。swiftly が読むファイルと SwiftLint の pin は別ファイルにする。同じ値を Makefile とワークフローに書かない
+6. Swift の版は `.swift-version` だけが決める。SwiftLint の版と zip の sha256、swiftly の版と tar.gz の sha256 は `eng/tool-versions.txt` だけが決める。同じ値を Makefile とワークフローに書かない。2026-10-24 の CI（run 40105035976）で `swiftlang.github.io` の swiftly-install.sh は `swift-server/swiftly` の latest を取りに行き、404（curl 終了 22）だった。導入は `download.swift.org` の swiftly 1.2.0 tarball にし、ローカルで `init --skip-install --assume-yes --no-modify-profile --quiet-shell-followup` が終了 0、`--version` が 1.2.0 になることを確認した
 7. ゲートは意図的な違反で発火することを証明してから active と書く
 8. 規約検査 `eng/conformance.py` は Python 標準ライブラリだけで書く
 
