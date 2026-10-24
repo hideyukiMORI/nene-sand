@@ -1,0 +1,2 @@
+swiftlint=0.65.1
+swiftlint_sha256=caeed6f4a679c35539ffaf124f6c4ab4a8416917f7d8796279dc52b74026059d

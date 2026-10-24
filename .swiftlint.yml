@@ -1,0 +1,30 @@
+only_rules:
+  - cyclomatic_complexity
+  - function_body_length
+  - function_parameter_count
+  - nesting
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+
+cyclomatic_complexity:
+  warning: 10
+  error: 10
+
+function_body_length:
+  warning: 40
+  error: 40
+
+function_parameter_count:
+  warning: 4
+  error: 4
+
+nesting:
+  type_level:
+    warning: 3
+    error: 3
+  function_level:
+    warning: 3
+    error: 3
+
+force_unwrapping: error
+implicitly_unwrapped_optional: error

@@ -1,0 +1,7 @@
+# target, then package dependencies. A token prefixed with + is an import
+# that is not a SwiftPM target (toolchain module).
+NeNeSandCore
+NeNeSandSave NeNeSandCore
+NeNeSandRender NeNeSandCore
+NeNeSandTerminal NeNeSandRender +Glibc
+NeNeSandApp NeNeSandCore NeNeSandSave NeNeSandRender NeNeSandTerminal +Foundation +Glibc
