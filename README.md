@@ -1,29 +1,31 @@
 # NeNe Sand
 
-端末で、マウスを使って砂を描いて落とすシミュレーター。コマンド名は `nene-sand`。
+Draw sand with the mouse and watch it fall, in the terminal. The command is `nene-sand`.
 
-![砂と水と油と火と木と溶岩と石](docs/images/playing.png)
+**English** · [日本語](README.ja.md)
 
-砂は落ちて積もる。水は低い方へ流れ、油はその上に浮く。火は昇って消え、木はその場に残る。溶岩はゆっくり流れ、水に触れると石になる。
+![Sand, water, oil, fire, wood, lava, and stone](docs/images/playing.png)
 
-上の画面は `m` の自由に遊ぶ。進行で遊ぶと、底の中央が回収口になり、消えた粒がお金になる。
+Sand falls and piles up. Water flows downhill. Oil floats on water. Fire rises and goes out. Wood stays where it is placed. Lava flows slowly, and turns to stone when it touches water.
 
-## インストール
+The picture above is free play (`m`). In progression, the bottom-center cell is a collector, and a grain that lands there becomes money.
 
-Ubuntu 22.04 以降の x86_64。Swift は要らない。
+## Install
+
+Ubuntu 22.04 or newer, x86_64. Swift is not required.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hideyukiMORI/nene-sand/main/install.sh | bash
 ```
 
-最新の [Release](https://github.com/hideyukiMORI/nene-sand/releases/latest) を取り、`SHA256SUMS` が合ってから `~/.local/bin/nene-sand` に置く。合わなければ何も置かない。スクリプトは [install.sh](install.sh)。実行する前に読める。
+This downloads the latest [release](https://github.com/hideyukiMORI/nene-sand/releases/latest), checks it against `SHA256SUMS`, and only then installs `~/.local/bin/nene-sand`. If the checksum does not match, nothing is installed. The script is [install.sh](install.sh). Read it before you pipe it.
 
-`~/.local/bin` が PATH に無いときは、その旨を出して終わる。多くの Ubuntu では、次のログインから入る。消すときは `rm ~/.local/bin/nene-sand`。
+If `~/.local/bin` is not on `PATH`, the script says so and stops. On many Ubuntu installs it is added at the next login. To remove it: `rm ~/.local/bin/nene-sand`.
 
-実行ファイルは Swift の標準ライブラリを中に持っている。外につながっているのは libc と libstdc++ と libgcc と libm だけである。
+The executable carries the Swift standard library inside. The only dynamic libraries it needs are libc, libstdc++, libgcc, and libm.
 
 <details>
-<summary>自分で置く</summary>
+<summary>Install by hand</summary>
 
 ```bash
 v=0.1.0
@@ -35,53 +37,53 @@ install -Dm755 nene-sand-linux-x86_64 ~/.local/bin/nene-sand
 
 </details>
 
-## 操作
+## Keys
 
-マウスの左で描き、右で消す。筆は `[` `]` で 1、3、5 マスになる。
+Draw with the left mouse button. Erase with the right. `[` and `]` set a square brush of 1, 3, or 5 cells.
 
-| キー | すること |
+| Key | What it does |
 | --- | --- |
-| `1` `2` | 砂、水。最初から描ける |
-| `3` `5` `6` | 油を 40、木を 20、溶岩を 80 で買う。足りなければ何も起きない |
-| `4` | 火。溶岩が油か木に火をつけたあとで描ける |
-| `7` | 石。水と溶岩で石ができてから描ける |
-| `f` | 蛇口を 60 で一度だけ買う。上の中央が空なら、水が 1 粒落ちる |
-| `a` | 自動描画。進行では、線の終わりに払える次の粒を一つ買い、蛇口も買う |
-| `Space` | 粒の流れと自動描画を止める。描くことと消すことはできる |
-| `c` | 盤の粒を全部消す。お金と、買ったものと、印は残る |
-| `m` | 自由に遊ぶ。全部描ける。お金は増えない。蛇口も落ちない |
-| `k` | 図鑑。売値が出る。開いているあいだ粒は止まる |
-| `t` | 12 のテーマを一周する。水はどのテーマでも青 |
-| `p` | 所持が 100 以上のとき、二度押すと盤とお金と蛇口を手放し、売値の倍率が 1 増える |
-| `q` | 終了する。購入と所持と倍率と蛇口と、火と石の印を保存する。盤の粒は残らない |
+| `1` `2` | Sand and water. Available from the start |
+| `3` `5` `6` | Buy oil for 40, wood for 20, and lava for 80. Nothing happens if you cannot pay |
+| `4` | Fire. Drawable after lava ignites oil or wood |
+| `7` | Stone. Drawable after water and lava make stone |
+| `f` | Buy the faucet once, for 60. One water grain drips into an empty top-center cell |
+| `a` | Automatic drawing. In progression, the end of a stroke buys the next grain you can afford, then the faucet |
+| `Space` | Pause the grains and automatic drawing. Drawing and erasing still work |
+| `c` | Clear every grain. Money, purchases, and the fire and stone marks stay |
+| `m` | Free play. Every material can be drawn. Money does not increase, and the faucet does not drip |
+| `k` | Codex. Open grains show their sell price. The simulation pauses while it is open |
+| `t` | Cycle twelve themes. Water stays blue in every theme |
+| `p` | With at least 100, press twice to give up the board, the purse, and the faucet, and raise the sell multiplier by 1 |
+| `q` | Quit. Saves purchases, the purse, the multiplier, the faucet, and the fire and stone marks. The grains are not saved |
 
-`Ctrl+C` でも、`q` と同じく保存して端末を戻す。
+`Ctrl+C` saves and restores the terminal, the same as `q`.
 
-## ルール
+## Rules
 
-- 売値は砂 1、水 2、石 4、木 8、油 16、火 0、溶岩 32。プレステージの倍率を掛ける
-- 火は買えない。溶岩が油か木に着火したときだけ解放される
-- 石は、水の上下左右に溶岩が触れるとできる。斜めでは固まらない
-- 火は油と木に燃え移り、水で消える。溶岩も油と木に火をつける
-- 蛇口を持っていると、他の粒でふさいでも、そのマスが空いたらまた水が落ちる
-- 図鑑の未解放は `..`。蛇口を持っていると `on`
-- 保存先は `$XDG_DATA_HOME/nene-sand/save`、無ければ `~/.local/share/nene-sand/save`
-- 窓を閉じただけでは、最後に `q` か `Ctrl+C` したところから先は残らない
+- Sell prices are sand 1, water 2, stone 4, wood 8, oil 16, fire 0, lava 32, times the prestige multiplier
+- Fire is not for sale. It unlocks only when lava ignites oil or wood
+- Stone forms when lava touches water on a side. A diagonal touch does not
+- Fire spreads to oil and wood, and water puts it out. Lava also ignites oil and wood
+- Once you own the faucet, covering the top-center cell only holds the next drop until that cell is empty again
+- A locked codex entry shows `..`. An owned faucet shows `on`
+- The save file is `$XDG_DATA_HOME/nene-sand/save`, or `~/.local/share/nene-sand/save`
+- Closing the window without `q` or `Ctrl+C` drops whatever happened since the last save
 
-![図鑑。自由に遊ぶでは粒が全部開いている](docs/images/codex.png)
+![The codex in free play, with every grain open](docs/images/codex.png)
 
-## 開発
+## Development
 
-完了の定義は次の 1 コマンドである。
+Done means this one command:
 
 ```bash
 make check
 ```
 
-Swift の版は `.swift-version` だけに書く。ソースから同じ実行ファイルを作るときは、別のディレクトリで次を使う。
+The Swift version lives only in `.swift-version`. To build the same executable from source, in a directory other than the gate's:
 
 ```bash
 swift build -c release --static-swift-stdlib
 ```
 
-開発の入口は [CLAUDE.md](CLAUDE.md) と [AGENTS.md](AGENTS.md)。公開の手順は [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md) のリリース節。
+The development handbooks are [CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md). The release steps are the release section of [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md).
