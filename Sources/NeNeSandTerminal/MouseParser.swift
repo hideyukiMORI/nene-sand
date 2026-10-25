@@ -73,6 +73,12 @@ public struct MouseParser {
     if byte == UInt8(ascii: " ") {
       return .pause
     }
+    if byte == UInt8(ascii: "[") {
+      return .brush(-1)
+    }
+    if byte == UInt8(ascii: "]") {
+      return .brush(1)
+    }
     return nil
   }
 

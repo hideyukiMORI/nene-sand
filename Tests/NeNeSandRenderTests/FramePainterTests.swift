@@ -27,59 +27,64 @@ struct FramePainterTests {
   @Test
   func automaticMarkSitsBesideTheName() {
     let frame = FramePainter.paint(
-      Board(width: 4, height: 2),
+      Board(width: 6, height: 2),
       brush: .water,
       marks: FramePainter.Marks(automatic: true)
     )
     #expect(frame.glyphs[0].shape == .text("水"))
     #expect(frame.glyphs[1].shape == .gap)
-    #expect(frame.glyphs[2].shape == .text("自"))
-    #expect(frame.glyphs[3].shape == .gap)
+    #expect(frame.glyphs[2].shape == .text("１"))
+    #expect(frame.glyphs[4].shape == .text("自"))
+    #expect(frame.glyphs[5].shape == .gap)
   }
 
   @Test
   func automaticMarkIsAbsentByDefault() {
-    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .sand)
-    #expect(frame.glyphs[2].shape == .blank)
-    #expect(frame.glyphs[3].shape == .blank)
+    let frame = FramePainter.paint(Board(width: 6, height: 2), brush: .sand)
+    #expect(frame.glyphs[2].shape == .text("１"))
+    #expect(frame.glyphs[3].shape == .gap)
+    #expect(frame.glyphs[4].shape == .blank)
   }
 
   @Test
   func stoneMarkSitsBesideTheName() {
     let frame = FramePainter.paint(
-      Board(width: 4, height: 2),
+      Board(width: 6, height: 2),
       brush: .water,
       marks: FramePainter.Marks(stoneKnown: true)
     )
-    #expect(frame.glyphs[2].shape == .text("石"))
-    #expect(frame.glyphs[2].foreground == FramePainter.stone)
-    #expect(frame.glyphs[3].shape == .gap)
+    #expect(frame.glyphs[2].shape == .text("１"))
+    #expect(frame.glyphs[4].shape == .text("石"))
+    #expect(frame.glyphs[4].foreground == FramePainter.stone)
+    #expect(frame.glyphs[5].shape == .gap)
   }
 
   @Test
   func stoneMarkFollowsTheAutomaticMark() {
     let frame = FramePainter.paint(
-      Board(width: 6, height: 2),
+      Board(width: 8, height: 2),
       brush: .water,
       marks: FramePainter.Marks(automatic: true, stoneKnown: true)
     )
-    #expect(frame.glyphs[2].shape == .text("自"))
-    #expect(frame.glyphs[4].shape == .text("石"))
-    #expect(frame.glyphs[5].shape == .gap)
+    #expect(frame.glyphs[2].shape == .text("１"))
+    #expect(frame.glyphs[4].shape == .text("自"))
+    #expect(frame.glyphs[6].shape == .text("石"))
+    #expect(frame.glyphs[7].shape == .gap)
   }
 
   @Test
   func pauseMarkFollowsTheOtherMarks() {
     let frame = FramePainter.paint(
-      Board(width: 8, height: 2),
+      Board(width: 10, height: 2),
       brush: .water,
-      marks: FramePainter.Marks(automatic: true, stoneKnown: true, paused: true)
+      marks: FramePainter.Marks(automatic: true, stoneKnown: true, paused: true, width: 5)
     )
-    #expect(frame.glyphs[2].shape == .text("自"))
-    #expect(frame.glyphs[4].shape == .text("石"))
-    #expect(frame.glyphs[6].shape == .text("停"))
-    #expect(frame.glyphs[6].foreground == FramePainter.water)
-    #expect(frame.glyphs[7].shape == .gap)
+    #expect(frame.glyphs[2].shape == .text("５"))
+    #expect(frame.glyphs[4].shape == .text("自"))
+    #expect(frame.glyphs[6].shape == .text("石"))
+    #expect(frame.glyphs[8].shape == .text("停"))
+    #expect(frame.glyphs[8].foreground == FramePainter.water)
+    #expect(frame.glyphs[9].shape == .gap)
   }
 
   @Test

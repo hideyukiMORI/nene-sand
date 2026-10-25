@@ -14,11 +14,18 @@ public enum FramePainter {
     public let automatic: Bool
     public let stoneKnown: Bool
     public let paused: Bool
+    public let width: Int
 
-    public init(automatic: Bool = false, stoneKnown: Bool = false, paused: Bool = false) {
+    public init(
+      automatic: Bool = false,
+      stoneKnown: Bool = false,
+      paused: Bool = false,
+      width: Int = 1
+    ) {
       self.automatic = automatic
       self.stoneKnown = stoneKnown
       self.paused = paused
+      self.width = width
     }
   }
 
@@ -41,7 +48,7 @@ public enum FramePainter {
   }
 
   private static func texts(_ marks: Marks) -> [Character] {
-    var shown: [Character] = []
+    var shown: [Character] = [widthMark(marks.width)]
     if marks.automatic {
       shown.append("自")
     }
@@ -81,6 +88,16 @@ public enum FramePainter {
       index += 1
     }
     return nil
+  }
+
+  private static func widthMark(_ width: Int) -> Character {
+    if width == 3 {
+      return "３"
+    }
+    if width == 5 {
+      return "５"
+    }
+    return "１"
   }
 
   private static func markColor(_ text: Character, brush: Grain) -> CellColor {
