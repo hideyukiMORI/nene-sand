@@ -85,9 +85,35 @@ struct FramePainterTests {
   }
 
   @Test
+  func codexListsSellPricesForWhatIsOpen() {
+    let board = Board(width: 20, height: 16)
+    let shut = FramePainter.paint(board, brush: .sand, marks: FramePainter.Marks(codex: true))
+    #expect(shown(shut, row: 3).contains("1 sand  1"))
+    #expect(shown(shut, row: 5).contains("3 oil  .."))
+    #expect(shown(shut, row: 9).contains("7 stone  .."))
+    #expect(shown(shut, row: 10).contains("f faucet  .."))
+    let oil = Progression.beginning.holding(Purse.zero.collecting(.lava).collecting(.wood))
+      .buying(.oil)
+    let open = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: oil, codex: true)
+    )
+    #expect(shown(open, row: 5).contains("3 oil  16"))
+    let free = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(stone: .free, codex: true)
+    )
+    #expect(shown(free, row: 5).contains("3 oil  16"))
+    #expect(shown(free, row: 9).contains("7 stone  4"))
+  }
+
+  @Test
   func wideHelpNamesTheThemeKey() {
     let frame = FramePainter.paint(Board(width: 100, height: 2), brush: .sand)
     #expect(shown(frame, row: 6).contains("t phosphor"))
+    #expect(shown(frame, row: 6).contains("k codex"))
   }
 
   @Test

@@ -56,6 +56,10 @@ public struct Progression: Equatable, Sendable {
     Price.ask(grain)
   }
 
+  public func worth(_ grain: Grain) -> Int {
+    Price.of(grain)
+  }
+
   public func buying(_ grain: Grain) -> Progression {
     guard let ask = Price.ask(grain) else {
       return self

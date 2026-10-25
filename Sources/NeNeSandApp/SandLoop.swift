@@ -22,6 +22,7 @@ struct SandLoop {
     var automatic = false
     var paused = false
     var freely = false
+    var codex = false
     var theme: Theme = .phosphor
     var reach = 0
     var hand = AutomaticStroke()
@@ -66,7 +67,7 @@ struct SandLoop {
     scene.toldTooSmall = false
     var current = resized(scene.board, to: size)
     scene.pen = apply(events, to: &current, pen: scene.pen, progress: &scene.progress)
-    if !scene.pen.paused && clock.now >= scene.nextTick {
+    if !scene.pen.paused && !scene.pen.codex && clock.now >= scene.nextTick {
       step(&current, pen: &scene.pen, progress: &scene.progress)
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
@@ -81,7 +82,8 @@ struct SandLoop {
         theme: scene.pen.theme,
         progress: scene.progress,
         fireKnown: current.fireKnown,
-        earning: !scene.pen.freely
+        earning: !scene.pen.freely,
+        codex: scene.pen.codex
       )
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
@@ -99,7 +101,7 @@ struct SandLoop {
     case .quit:
       return true
     case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely,
-      .theme, .faucet:
+      .theme, .faucet, .codex:
       return false
     }
   }
@@ -154,8 +156,20 @@ struct SandLoop {
     pen: Pen,
     progress: inout Progression
   ) -> Pen {
+    if pen.codex {
+      return reading(event, pen: pen)
+    }
+    return playing(event, to: &board, pen: pen, progress: &progress)
+  }
+
+  private func playing(
+    _ event: TerminalEvent,
+    to board: inout Board,
+    pen: Pen,
+    progress: inout Progression
+  ) -> Pen {
     switch event {
-    case .quit, .theme, .faucet:
+    case .quit, .theme, .faucet, .codex:
       return tuned(event, pen: pen, progress: &progress)
     case .material(let key):
       return chosen(pen, key: key, known: learned(board), progress: &progress)
@@ -177,6 +191,7 @@ struct SandLoop {
         automatic: !pen.automatic,
         paused: pen.paused,
         freely: pen.freely,
+        codex: pen.codex,
         theme: pen.theme,
         reach: pen.reach,
         hand: AutomaticStroke(),
@@ -201,6 +216,7 @@ struct SandLoop {
       automatic: pen.automatic,
       paused: pen.paused,
       freely: pen.freely,
+      codex: pen.codex,
       theme: pen.theme,
       reach: pen.reach,
       hand: pen.hand,
@@ -214,9 +230,29 @@ struct SandLoop {
       return recolored(pen)
     case .faucet:
       return boughtFaucet(pen, progress: &progress)
+    case .codex:
+      return paged(pen)
     case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
       return pen
     }
+  }
+
+  private func reading(_ event: TerminalEvent, pen: Pen) -> Pen {
+    switch event {
+    case .codex:
+      return paged(pen)
+    case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely,
+      .theme, .faucet:
+      return pen
+    }
+  }
+
+  private func paged(_ pen: Pen) -> Pen {
+    var next = pen
+    next.codex.toggle()
+    next.stroke = nil
+    next.handAt = nil
+    return next
   }
 
   private func recolored(_ pen: Pen) -> Pen {

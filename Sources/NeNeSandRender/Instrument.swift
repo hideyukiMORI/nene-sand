@@ -254,7 +254,7 @@ public enum Instrument {
     return chipName(grain)
   }
 
-  private static func chipName(_ grain: Grain) -> String {
+  static func chipName(_ grain: Grain) -> String {
     switch grain {
     case .empty:
       return ""
@@ -474,7 +474,10 @@ public enum Instrument {
   }
 
   private static func modeKeys(_ theme: Theme) -> [(String, String)] {
-    [("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", theme.name())]
+    [
+      ("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", theme.name()),
+      ("k", "codex"),
+    ]
   }
 
   private static func allKeys(_ theme: Theme) -> [(String, String)] {
