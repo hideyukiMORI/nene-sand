@@ -91,7 +91,7 @@ public struct Board {
     }
     let grain = cells[from]
     for slide in grain.slides(bias: bias) {
-      if grain == .water && !waterMaySlide(slide, x: x, y: y, from: from) {
+      if grain.flows() && !liquidMaySlide(slide, x: x, y: y, from: from) {
         continue
       }
       if shift(from: from, grain: grain, slide: slide, settled: &settled) {
@@ -100,7 +100,7 @@ public struct Board {
     }
   }
 
-  private func waterMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+  private func liquidMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
     if slide.dy != 0 {
       return true
     }
@@ -108,10 +108,10 @@ public struct Board {
       return false
     }
     let toward = surface(x + slide.dx)
-    if !WaterMotion.canLevel(from: surface(x), toward: toward) {
+    if !LiquidMotion.canLevel(from: surface(x), toward: toward) {
       return false
     }
-    return WaterMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+    return LiquidMotion.keepsCourse(drift: drift[from], dx: slide.dx)
   }
 
   private func surface(_ x: Int) -> Int {
@@ -152,7 +152,7 @@ public struct Board {
   }
 
   private mutating func settleDrift(_ grain: Grain, slide: Slide, to: Int) {
-    if grain != .water {
+    if !grain.flows() {
       return
     }
     drift[to] = slide.dy == 0 ? slide.dx : 0

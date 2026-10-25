@@ -40,6 +40,7 @@ struct MouseParserTests {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: "1")]) == [.material(.sand)])
     #expect(parser.feed([UInt8(ascii: "2")]) == [.material(.water)])
+    #expect(parser.feed([UInt8(ascii: "3")]) == [.material(.oil)])
   }
 
   @Test
