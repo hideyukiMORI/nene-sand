@@ -7,6 +7,7 @@ struct SandLoop {
   private static let minimumColumns = 8
   private static let minimumRows = 4
   private static let step = Duration.milliseconds(16)
+  private static let widestReach = 2
 
   private let trueColor: Bool
   private let clock = ContinuousClock()
@@ -20,6 +21,7 @@ struct SandLoop {
     var stroke: Cursor?
     var automatic = false
     var paused = false
+    var reach = 0
     var hand = AutomaticStroke()
     var handAt: Cursor?
   }
@@ -74,7 +76,8 @@ struct SandLoop {
       marks: FramePainter.Marks(
         automatic: scene.pen.automatic,
         stoneKnown: current.stoneKnown,
-        paused: scene.pen.paused
+        paused: scene.pen.paused,
+        width: scene.pen.reach * 2 + 1
       )
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
@@ -91,7 +94,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic, .clear, .pause:
+    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush:
       return false
     }
   }
@@ -132,24 +135,25 @@ struct SandLoop {
       next.handAt = nil
       return next
     case .pause:
-      var next = pen
-      next.paused.toggle()
-      return next
+      return toggled(pen)
+    case .brush(let delta):
+      return sized(pen, delta: delta)
     case .automatic:
       return Pen(
         grain: pen.grain,
         stroke: nil,
         automatic: !pen.automatic,
         paused: pen.paused,
+        reach: pen.reach,
         hand: AutomaticStroke(),
         handAt: nil
       )
     case .press(let cursor, let pointer):
-      stampCell(cursor, grain: ink(pointer, pen: pen), on: &board)
+      stampBrush(cursor, dab: dab(pointer, pen: pen), on: &board)
       return moved(pen, grain: pen.grain, stroke: cursor)
     case .drag(let cursor, let pointer):
       let start = pen.stroke ?? cursor
-      connect(from: start, to: cursor, grain: ink(pointer, pen: pen), on: &board)
+      connect(from: start, to: cursor, dab: dab(pointer, pen: pen), on: &board)
       return moved(pen, grain: pen.grain, stroke: cursor)
     case .release:
       return moved(pen, grain: pen.grain, stroke: nil)
@@ -162,6 +166,7 @@ struct SandLoop {
       stroke: stroke,
       automatic: pen.automatic,
       paused: pen.paused,
+      reach: pen.reach,
       hand: pen.hand,
       handAt: pen.handAt
     )
@@ -178,10 +183,11 @@ struct SandLoop {
       return next
     }
     let cursor = Cursor(column: point.x, row: point.y + 1)
+    let dab = Dab(grain: next.grain, reach: next.reach)
     if let previous = next.handAt {
-      connect(from: previous, to: cursor, grain: next.grain, on: &board)
+      connect(from: previous, to: cursor, dab: dab, on: &board)
     } else {
-      stampCell(cursor, grain: next.grain, on: &board)
+      stampBrush(cursor, dab: dab, on: &board)
     }
     next.handAt = cursor
     return next
@@ -215,13 +221,45 @@ struct SandLoop {
     }
   }
 
-  private func connect(from start: Cursor, to end: Cursor, grain: Grain, on board: inout Board) {
+  private struct Dab {
+    var grain: Grain
+    var reach: Int
+  }
+
+  private func toggled(_ pen: Pen) -> Pen {
+    var next = pen
+    next.paused.toggle()
+    return next
+  }
+
+  private func sized(_ pen: Pen, delta: Int) -> Pen {
+    let reach = pen.reach + delta
+    if reach < 0 || reach > Self.widestReach {
+      return pen
+    }
+    var next = pen
+    next.reach = reach
+    return next
+  }
+
+  private func dab(_ pointer: TerminalEvent.Pointer, pen: Pen) -> Dab {
+    Dab(grain: ink(pointer, pen: pen), reach: pen.reach)
+  }
+
+  private func connect(from start: Cursor, to end: Cursor, dab: Dab, on board: inout Board) {
     let cells = Stroke.cells(
       from: Point(x: start.column, y: start.row),
       to: Point(x: end.column, y: end.row)
     )
     for cell in cells {
-      stampCell(Cursor(column: cell.x, row: cell.y), grain: grain, on: &board)
+      stampBrush(Cursor(column: cell.x, row: cell.y), dab: dab, on: &board)
+    }
+  }
+
+  private func stampBrush(_ cursor: Cursor, dab: Dab, on board: inout Board) {
+    let cells = Brush.cells(around: Point(x: cursor.column, y: cursor.row), reach: dab.reach)
+    for cell in cells {
+      stampCell(Cursor(column: cell.x, row: cell.y), grain: dab.grain, on: &board)
     }
   }
 

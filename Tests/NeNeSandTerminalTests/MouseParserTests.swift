@@ -29,6 +29,13 @@ struct MouseParserTests {
   }
 
   @Test
+  func bracketsChangeTheBrush() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: "[")]) == [.brush(-1)])
+    #expect(parser.feed([UInt8(ascii: "]")]) == [.brush(1)])
+  }
+
+  @Test
   func spacePauses() {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: " ")]) == [.pause])
