@@ -6,7 +6,7 @@ the normative documents live in [docs/](docs/).
 ## Project identity
 
 - Product: NeNe Sand — a mouse-drawn falling-sand simulator for the terminal, with incremental-game progression
-- Language / UI: Swift 6.4.1 / the terminal (ANSI, not yet implemented)
+- Language / UI: Swift 6.4.1 / the terminal (ANSI). The sand slice draws and falls. Water, reactions, progression, and save are not in this revision
 - Package root: `nene-sand` (composition module `NeNeSandApp`)
 - Governing principle: **one meaning, one canonical implementation path, enforced by machines**
 

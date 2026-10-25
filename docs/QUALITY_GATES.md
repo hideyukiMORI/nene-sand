@@ -53,7 +53,7 @@ CI で必要なゲートは、すべてローカルの `make check` で実行で
 
 ### QLT-008 — 振る舞いの変更はテストを伴う
 
-振る舞いを変えたら、いちばん狭い安定した境界に Swift Testing のテストを足す。製品の振る舞いがまだ無いので、意味の無いテストは足していない（ADR 0002）。
+振る舞いを変えたら、いちばん狭い安定した境界に Swift Testing のテストを足す。砂の落下、線、半角ブロック、マウス列はテストがある。`make check` は `swift test` を呼ぶ。テストが無い変更を機械は見分けないので、この規則は planned のままである。
 
 - 機械強制: **planned**（レビュー事項。カバレッジ下限は置いていない）
 
@@ -180,14 +180,14 @@ NeNeSandApp 以外の時刻・乱数・環境の綴りと、Sources 全体の Ta
 | ARC-001 | planned | レビュー。CNF-001 が温床を減らす |
 | ARC-002 | active | CNF-011 と SwiftPM |
 | ARC-003 | planned | import 禁止は ARC-002 と ARC-007 が部分的に見る |
-| ARC-004 | planned | 所有者の表。製品の型はまだ無い |
+| ARC-004 | planned | 所有者の表。機械は表とコードの一致を見ない |
 | ARC-005 | planned | 区画の表。CNF-012 は public var だけ |
 | ARC-006 | planned | 実行ターゲットが 1 つであることは CNF-011 |
 | ARC-007 | active | CNF-010 |
 | ARC-008 | planned | レビュー |
 | ARC-009 | planned | セーブ形式はまだ無い |
 | ARC-010 | planned | レビュー |
-| ARC-011 | planned | 描画コードはまだ無い |
+| ARC-011 | planned | Render と Terminal の分離はレビュー |
 | ARC-012 | 不能 | QLT-010 の手続き |
 | SWF-001 | planned | レビュー |
 | SWF-002 | active | コンパイラと CNF-009 |
@@ -248,7 +248,7 @@ NeNeSandApp 以外の時刻・乱数・環境の綴りと、Sources 全体の Ta
 | アーキテクチャ | ターゲットと import | CNF-011 |
 | 規約検査 | このリポジトリ固有 | `eng/conformance.py` |
 | 検査自身のテスト | 正例と反例 | `eng/test_conformance.py` と `eng/test_commit_message.py` |
-| 製品の単体テスト | 振る舞い | まだ無い（ADR 0002）。`swift test` は結線しない |
+| 製品の単体テスト | 砂の落下、線、半角ブロック、マウス列 | `swift test`。失敗すると QLT-008。カバレッジ下限は置いていない |
 | カバレッジ | 中核の検証密度 | 置いていない |
 | 依存 | 再現性 | 実行時依存 0。SwiftLint の zip は sha256 で照合する |
 

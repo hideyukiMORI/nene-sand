@@ -91,4 +91,4 @@ Waivers: none | WVR-NNNN
 
 現在のタスクは [docs/todo/current.md](docs/todo/current.md)。GitHub Issue が正で、そこは要約。
 
-動くのは `make check` である。砂のシミュレーションは、このリポジトリにはまだ無い。
+動くのは `make check` と、砂を描いて落とす最小版である。水、反応、進行、セーブはまだ無い。

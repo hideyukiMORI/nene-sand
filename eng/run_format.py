@@ -17,6 +17,7 @@ def main() -> int:
             ".swift-format",
             "Package.swift",
             "Sources",
+            "Tests",
         ],
         capture_output=True,
         text=True,

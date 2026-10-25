@@ -102,7 +102,7 @@
 
 ### SWF-013 — 並行性の形は一つ
 
-シミュレーションの tick を進めるのは、合成ルートの同期ループだけである。`Task`、`Task.detached`、`TaskGroup`、`import Dispatch` を Sources のどこにも書かない。Swift 6 言語モードの厳密な並行性はツールチェーンの既定である。データ競合の実測は、可変な製品の型がまだ無いので行っていない。
+シミュレーションの tick を進めるのは、合成ルートの同期ループだけである。`Task`、`Task.detached`、`TaskGroup`、`import Dispatch` を Sources のどこにも書かない。Swift 6 言語モードの厳密な並行性はツールチェーンの既定である。データ競合の実測は行っていない。
 
 - 機械強制: **active**（CNF-010 が Task と Dispatch を拒否する）
 
