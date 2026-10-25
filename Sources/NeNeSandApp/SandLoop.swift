@@ -106,7 +106,7 @@ struct SandLoop {
 
   private func step(_ board: inout Board, pen: inout Pen, progress: inout Progression) {
     if pen.automatic {
-      pen = follow(pen, on: &board, progress: progress)
+      pen = follow(pen, on: &board, progress: &progress)
     }
     let gathered = earned(board, pen: pen, purse: progress.purse)
     board = gathered.board
@@ -225,12 +225,12 @@ struct SandLoop {
     return next
   }
 
-  private func follow(_ pen: Pen, on board: inout Board, progress: Progression) -> Pen {
+  private func follow(_ pen: Pen, on board: inout Board, progress: inout Progression) -> Pen {
     var next = pen
     let rows = board.height / 2
     guard let point = next.hand.next(width: board.width, height: rows) else {
       if next.handAt != nil {
-        next.grain = cycled(next, progress: progress, fire: board.fireKnown)
+        next.grain = spent(next, progress: &progress, fire: board.fireKnown)
       }
       next.handAt = nil
       return next
@@ -368,11 +368,13 @@ struct SandLoop {
     return progress.owns(grain)
   }
 
-  private func cycled(_ pen: Pen, progress: Progression, fire: Bool) -> Grain {
+  private func spent(_ pen: Pen, progress: inout Progression, fire: Bool) -> Grain {
     if pen.freely {
       return AutomaticStroke.nextBrush(pen.grain)
     }
-    return progress.following(pen.grain, fire: fire)
+    let stepped = progress.advancing(pen.grain, fire: fire)
+    progress = stepped.progress
+    return stepped.grain
   }
 
   private func stoneMark(_ pen: Pen, known: Bool) -> FramePainter.StoneMark {
