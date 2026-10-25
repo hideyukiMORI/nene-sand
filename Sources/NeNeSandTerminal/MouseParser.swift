@@ -76,6 +76,13 @@ public struct MouseParser {
     if byte == UInt8(ascii: " ") {
       return .pause
     }
+    return themeEvent(byte)
+  }
+
+  private func themeEvent(_ byte: UInt8) -> TerminalEvent? {
+    if byte == UInt8(ascii: "t") || byte == UInt8(ascii: "T") {
+      return .theme
+    }
     return brushEvent(byte)
   }
 

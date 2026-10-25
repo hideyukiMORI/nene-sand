@@ -56,6 +56,13 @@ struct MouseParserTests {
   }
 
   @Test
+  func tCyclesTheTheme() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: "t")]) == [.theme])
+    #expect(parser.feed([UInt8(ascii: "T")]) == [.theme])
+  }
+
+  @Test
   func aTogglesAutomatic() {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: "a")]) == [.automatic])

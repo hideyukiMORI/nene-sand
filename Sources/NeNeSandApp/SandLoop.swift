@@ -22,6 +22,7 @@ struct SandLoop {
     var automatic = false
     var paused = false
     var freely = false
+    var theme: Theme = .phosphor
     var reach = 0
     var hand = AutomaticStroke()
     var handAt: Cursor?
@@ -78,7 +79,8 @@ struct SandLoop {
         automatic: scene.pen.automatic,
         stone: stoneMark(scene.pen, known: current.stoneKnown),
         paused: scene.pen.paused,
-        width: scene.pen.reach * 2 + 1
+        width: scene.pen.reach * 2 + 1,
+        theme: scene.pen.theme
       )
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
@@ -95,7 +97,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
+    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely, .theme:
       return false
     }
   }
@@ -121,8 +123,8 @@ struct SandLoop {
 
   private func applyOne(_ event: TerminalEvent, to board: inout Board, pen: Pen) -> Pen {
     switch event {
-    case .quit:
-      return pen
+    case .quit, .theme:
+      return tuned(event, pen: pen)
     case .material(let key):
       return chosen(pen, key: key, known: board.stoneKnown)
     case .clear:
@@ -143,6 +145,7 @@ struct SandLoop {
         automatic: !pen.automatic,
         paused: pen.paused,
         freely: pen.freely,
+        theme: pen.theme,
         reach: pen.reach,
         hand: AutomaticStroke(),
         handAt: nil
@@ -166,10 +169,26 @@ struct SandLoop {
       automatic: pen.automatic,
       paused: pen.paused,
       freely: pen.freely,
+      theme: pen.theme,
       reach: pen.reach,
       hand: pen.hand,
       handAt: pen.handAt
     )
+  }
+
+  private func tuned(_ event: TerminalEvent, pen: Pen) -> Pen {
+    switch event {
+    case .theme:
+      return recolored(pen)
+    case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
+      return pen
+    }
+  }
+
+  private func recolored(_ pen: Pen) -> Pen {
+    var next = pen
+    next.theme = pen.theme.next()
+    return next
   }
 
   private func follow(_ pen: Pen, on board: inout Board) -> Pen {
