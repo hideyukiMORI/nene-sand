@@ -70,9 +70,16 @@ public struct MouseParser {
     if byte == UInt8(ascii: "c") || byte == UInt8(ascii: "C") {
       return .clear
     }
+    if byte == UInt8(ascii: "m") || byte == UInt8(ascii: "M") {
+      return .freely
+    }
     if byte == UInt8(ascii: " ") {
       return .pause
     }
+    return brushEvent(byte)
+  }
+
+  private func brushEvent(_ byte: UInt8) -> TerminalEvent? {
     if byte == UInt8(ascii: "[") {
       return .brush(-1)
     }

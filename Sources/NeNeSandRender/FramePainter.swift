@@ -10,20 +10,26 @@ public enum FramePainter {
   public static let stone = CellColor(red: 132, green: 136, blue: 144)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
+  public enum StoneMark: Equatable, Sendable {
+    case hidden
+    case known
+    case free
+  }
+
   public struct Marks: Equatable, Sendable {
     public let automatic: Bool
-    public let stoneKnown: Bool
+    public let stone: StoneMark
     public let paused: Bool
     public let width: Int
 
     public init(
       automatic: Bool = false,
-      stoneKnown: Bool = false,
+      stone: StoneMark = .hidden,
       paused: Bool = false,
       width: Int = 1
     ) {
       self.automatic = automatic
-      self.stoneKnown = stoneKnown
+      self.stone = stone
       self.paused = paused
       self.width = width
     }
@@ -52,8 +58,14 @@ public enum FramePainter {
     if marks.automatic {
       shown.append("自")
     }
-    if marks.stoneKnown {
+    switch marks.stone {
+    case .hidden:
+      break
+    case .known:
       shown.append("石")
+    case .free:
+      shown.append("石")
+      shown.append("遊")
     }
     if marks.paused {
       shown.append("停")

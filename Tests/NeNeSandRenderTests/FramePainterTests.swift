@@ -51,7 +51,7 @@ struct FramePainterTests {
     let frame = FramePainter.paint(
       Board(width: 6, height: 2),
       brush: .water,
-      marks: FramePainter.Marks(stoneKnown: true)
+      marks: FramePainter.Marks(stone: .known)
     )
     #expect(frame.glyphs[2].shape == .text("１"))
     #expect(frame.glyphs[4].shape == .text("石"))
@@ -64,7 +64,7 @@ struct FramePainterTests {
     let frame = FramePainter.paint(
       Board(width: 8, height: 2),
       brush: .water,
-      marks: FramePainter.Marks(automatic: true, stoneKnown: true)
+      marks: FramePainter.Marks(automatic: true, stone: .known)
     )
     #expect(frame.glyphs[2].shape == .text("１"))
     #expect(frame.glyphs[4].shape == .text("自"))
@@ -77,7 +77,7 @@ struct FramePainterTests {
     let frame = FramePainter.paint(
       Board(width: 10, height: 2),
       brush: .water,
-      marks: FramePainter.Marks(automatic: true, stoneKnown: true, paused: true, width: 5)
+      marks: FramePainter.Marks(automatic: true, stone: .known, paused: true, width: 5)
     )
     #expect(frame.glyphs[2].shape == .text("５"))
     #expect(frame.glyphs[4].shape == .text("自"))
@@ -85,6 +85,21 @@ struct FramePainterTests {
     #expect(frame.glyphs[8].shape == .text("停"))
     #expect(frame.glyphs[8].foreground == FramePainter.water)
     #expect(frame.glyphs[9].shape == .gap)
+  }
+
+  @Test
+  func freePlayShowsStoneAndTheMode() {
+    let frame = FramePainter.paint(
+      Board(width: 8, height: 2),
+      brush: .water,
+      marks: FramePainter.Marks(stone: .free)
+    )
+    #expect(frame.glyphs[2].shape == .text("１"))
+    #expect(frame.glyphs[4].shape == .text("石"))
+    #expect(frame.glyphs[4].foreground == FramePainter.stone)
+    #expect(frame.glyphs[6].shape == .text("遊"))
+    #expect(frame.glyphs[6].foreground == FramePainter.water)
+    #expect(frame.glyphs[7].shape == .gap)
   }
 
   @Test

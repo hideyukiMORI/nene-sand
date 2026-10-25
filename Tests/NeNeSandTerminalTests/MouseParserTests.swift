@@ -29,6 +29,13 @@ struct MouseParserTests {
   }
 
   @Test
+  func mTogglesFreePlay() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: "m")]) == [.freely])
+    #expect(parser.feed([UInt8(ascii: "M")]) == [.freely])
+  }
+
+  @Test
   func bracketsChangeTheBrush() {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: "[")]) == [.brush(-1)])
