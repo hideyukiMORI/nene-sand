@@ -1,10 +1,8 @@
 import Foundation
-import NeNeSandSave
 
 @main
 enum SandCommand {
   static func main() {
-    _ = NeNeSandSave.self
     var loop = SandLoop(trueColor: prefersTrueColor())
     loop.run()
   }

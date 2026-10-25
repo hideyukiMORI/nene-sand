@@ -19,6 +19,10 @@ public struct Purse: Equatable, Sendable {
     Purse(amount: amount, multiplier: multiplier + 1)
   }
 
+  static func restored(amount: Int, multiplier: Int) -> Purse {
+    Purse(amount: amount, multiplier: multiplier)
+  }
+
   private let multiplier: Int
 
   private init(amount: Int, multiplier: Int = 1) {

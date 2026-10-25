@@ -17,3 +17,4 @@
 | --- | --- | --- |
 | [0001](0001-strictness-is-mechanically-enforced.md) | 厳格さは機械で強制する | 受理 |
 | [0002](0002-swift-testing-is-the-only-test-framework.md) | 製品テストは Swift Testing だけ | 受理 |
+| [0003](0003-save-the-progress-not-the-board.md) | セーブは進行と火と石の印だけ | 受理 |
