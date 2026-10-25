@@ -7,6 +7,10 @@ public struct Purse: Equatable, Sendable {
     Purse(amount: amount + Price.of(grain) * Self.rate)
   }
 
+  func paying(_ price: Int) -> Purse {
+    Purse(amount: amount - price)
+  }
+
   private static let rate = 1
 
   private init(amount: Int) {

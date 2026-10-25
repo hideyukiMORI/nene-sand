@@ -92,7 +92,7 @@ public enum Instrument {
     return compose(
       [
         .text("| ", ink.frameBright, ink.ground),
-        .cells(palette(brush, open: marks.stone != .hidden, wide: wide, theme: marks.theme)),
+        .cells(palette(brush, marks: marks, wide: wide)),
         .fill(" ", ink.frameBright),
         .text(" |", ink.frameBright, ink.ground),
       ],
@@ -158,7 +158,7 @@ public enum Instrument {
       return []
     }
     let ink = marks.theme.chrome
-    return [.text(" $ " + String(marks.purse.amount), ink.accent, ink.ground)]
+    return [.text(" $ " + String(marks.progress.purse.amount), ink.accent, ink.ground)]
   }
 
   private static func aside(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {
@@ -199,37 +199,81 @@ public enum Instrument {
     let color: CellColor
     let on: Bool
     let shut: Bool
+    let tag: String
   }
 
-  private static func palette(_ brush: Grain, open: Bool, wide: Bool, theme: Theme) -> [Glyph] {
-    chip(
-      Sample(key: "1", name: "sand", color: theme.ink(.sand), on: brush == .sand, shut: false),
-      wide: wide, theme: theme)
-      + chip(
-        Sample(key: "2", name: "water", color: theme.ink(.water), on: brush == .water, shut: false),
-        wide: wide, theme: theme)
-      + chip(
-        Sample(key: "3", name: "oil", color: theme.ink(.oil), on: brush == .oil, shut: false),
-        wide: wide, theme: theme)
-      + chip(
-        Sample(key: "4", name: "fire", color: theme.ink(.fire), on: brush == .fire, shut: false),
-        wide: wide, theme: theme)
-      + chip(
-        Sample(key: "5", name: "wood", color: theme.ink(.wood), on: brush == .wood, shut: false),
-        wide: wide, theme: theme)
-      + chip(
-        Sample(key: "6", name: "lava", color: theme.ink(.lava), on: brush == .lava, shut: false),
-        wide: wide, theme: theme)
-      + chip(
-        Sample(key: "7", name: "stone", color: theme.ink(.stone), on: brush == .stone, shut: !open),
-        wide: wide, theme: theme)
+  private static func palette(_ brush: Grain, marks: FramePainter.Marks, wide: Bool) -> [Glyph] {
+    let theme = marks.theme
+    return chip(sample("1", .sand, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("2", .water, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("3", .oil, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("4", .fire, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("5", .wood, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("6", .lava, brush: brush, marks: marks), wide: wide, theme: theme)
+      + chip(sample("7", .stone, brush: brush, marks: marks), wide: wide, theme: theme)
+  }
+
+  private static func sample(
+    _ key: String,
+    _ grain: Grain,
+    brush: Grain,
+    marks: FramePainter.Marks
+  ) -> Sample {
+    let shut = closed(grain, marks: marks)
+    return Sample(
+      key: key,
+      name: label(grain, shut: shut, marks: marks),
+      color: marks.theme.ink(grain),
+      on: brush == grain,
+      shut: shut,
+      tag: ".."
+    )
+  }
+
+  private static func closed(_ grain: Grain, marks: FramePainter.Marks) -> Bool {
+    if marks.stone == .free {
+      return false
+    }
+    if grain == .stone {
+      return marks.stone == .hidden
+    }
+    return !marks.progress.owns(grain)
+  }
+
+  private static func label(_ grain: Grain, shut: Bool, marks: FramePainter.Marks) -> String {
+    if shut, let ask = marks.progress.cost(grain) {
+      return String(ask)
+    }
+    return chipName(grain)
+  }
+
+  private static func chipName(_ grain: Grain) -> String {
+    switch grain {
+    case .empty:
+      return ""
+    case .sand:
+      return "sand"
+    case .water:
+      return "water"
+    case .oil:
+      return "oil"
+    case .fire:
+      return "fire"
+    case .wood:
+      return "wood"
+    case .lava:
+      return "lava"
+    case .stone:
+      return "stone"
+    }
   }
 
   private static func chip(_ sample: Sample, wide: Bool, theme: Theme) -> [Glyph] {
     let ink = theme.chrome
     let bed = sample.on ? ink.select : ink.ground
     let sampleCells =
-      sample.shut ? letters("..", foreground: ink.label, background: bed) : swatch(sample.color)
+      sample.shut
+      ? letters(sample.tag, foreground: ink.label, background: bed) : swatch(sample.color)
     var cells = letters(sample.on ? "[" : " ", foreground: ink.paper, background: ink.ground)
     cells.append(
       contentsOf: letters(sample.key, foreground: keyInk(sample, theme: theme), background: bed))
