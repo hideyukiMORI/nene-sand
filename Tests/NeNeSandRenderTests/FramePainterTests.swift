@@ -107,6 +107,54 @@ struct FramePainterTests {
     )
     #expect(shown(free, row: 5).contains("3 oil  16"))
     #expect(shown(free, row: 9).contains("7 stone  4"))
+    let doubled = committed(Progression.beginning.holding(pile()))
+    let rated = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: doubled, codex: true)
+    )
+    #expect(shown(rated, row: 3).contains("1 sand  2"))
+  }
+
+  @Test
+  func prestigeNamesThePriceAndTheConfirm() {
+    let board = Board(width: 80, height: 2)
+    let rich = Progression.beginning.holding(pile())
+    let ready = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: rich, earning: true)
+    )
+    #expect(shown(ready, row: 4).contains("$ 100"))
+    #expect(shown(ready, row: 4).contains("p 100"))
+    #expect(!shown(ready, row: 4).contains("x2"))
+    let armed = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: rich, earning: true, confirming: true)
+    )
+    #expect(shown(armed, row: 4).contains("p again"))
+    #expect(!shown(armed, row: 4).contains("p 100"))
+    let doubled = committed(rich)
+    let raised = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: doubled, earning: true)
+    )
+    #expect(shown(raised, row: 4).contains("x2"))
+    #expect(!shown(raised, row: 4).contains("p 100"))
+  }
+
+  private func pile() -> Purse {
+    Purse.zero.collecting(.lava).collecting(.lava).collecting(.lava).collecting(.stone)
+  }
+
+  private func committed(_ progress: Progression) -> Progression {
+    guard case .done(let next) = Prestige.asking(true, progress: progress) else {
+      #expect(Bool(false))
+      return progress
+    }
+    return next
   }
 
   @Test
@@ -218,6 +266,7 @@ struct FramePainterTests {
     )
     #expect(shown(frame, row: 4).contains("$ 32"))
     #expect(shown(frame, row: 4).contains("f 60"))
+    #expect(!shown(frame, row: 4).contains("p 100"))
     let mouth = FramePainter.topRows * board.width + board.width / 2
     #expect(frame.glyphs[mouth].background == Theme.phosphor.accent())
   }

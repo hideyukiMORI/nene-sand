@@ -127,13 +127,14 @@ public enum Instrument {
     let theme = marks.theme
     let ink = theme.chrome
     let voice = tone(mode, brush: brush, theme: theme)
+    let words = sentence(mode, brush: brush, marks: marks)
     if width >= namedWidth {
       return compose(
         worth(marks) + [
           .text(" >> ", voice, ink.ground),
           .text(tag(mode, brush: brush), voice, ink.ground),
           .text(" :: ", ink.frameBright, ink.ground),
-          .text(line(mode, brush: brush), ink.accent, ink.ground),
+          .text(words, ink.accent, ink.ground),
           .fill(" .", ink.frameBright),
           .cells(hint(mode, theme: theme)),
         ],
@@ -145,7 +146,7 @@ public enum Instrument {
       worth(marks) + [
         .text(">> ", voice, ink.ground),
         .text(tag(mode, brush: brush), voice, ink.ground),
-        .text(" " + line(mode, brush: brush), ink.accent, ink.ground),
+        .text(" " + words, ink.accent, ink.ground),
         .fill(" ", ink.frameBright),
       ],
       width: width,
@@ -159,10 +160,23 @@ public enum Instrument {
     }
     let ink = marks.theme.chrome
     var line = " $ " + String(marks.progress.purse.amount)
+    if marks.progress.purse.rate() > 1 {
+      line += "  x" + String(marks.progress.purse.rate())
+    }
     if let ask = marks.progress.faucetCost() {
       line += "  f " + String(ask)
     }
+    if !marks.confirming, let ask = marks.progress.prestigeCost() {
+      line += "  p " + String(ask)
+    }
     return [.text(line, ink.accent, ink.ground)]
+  }
+
+  private static func sentence(_ mode: Mode, brush: Grain, marks: FramePainter.Marks) -> String {
+    if marks.confirming {
+      return "p again resets the board, purse, and faucet."
+    }
+    return line(mode, brush: brush)
   }
 
   private static func aside(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {
@@ -476,7 +490,7 @@ public enum Instrument {
   private static func modeKeys(_ theme: Theme) -> [(String, String)] {
     [
       ("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", theme.name()),
-      ("k", "codex"),
+      ("k", "codex"), ("p", "again"),
     ]
   }
 

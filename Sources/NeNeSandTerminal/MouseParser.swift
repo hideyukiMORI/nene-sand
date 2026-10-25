@@ -107,6 +107,13 @@ public struct MouseParser {
     if byte == UInt8(ascii: "k") || byte == UInt8(ascii: "K") {
       return .codex
     }
+    return prestigeEvent(byte)
+  }
+
+  private func prestigeEvent(_ byte: UInt8) -> TerminalEvent? {
+    if byte == UInt8(ascii: "p") || byte == UInt8(ascii: "P") {
+      return .prestige
+    }
     return nil
   }
 

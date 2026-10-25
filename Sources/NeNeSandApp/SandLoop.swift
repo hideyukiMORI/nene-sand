@@ -27,6 +27,7 @@ struct SandLoop {
     var reach = 0
     var hand = AutomaticStroke()
     var handAt: Cursor?
+    var confirming = false
   }
 
   private struct Scene {
@@ -72,24 +73,26 @@ struct SandLoop {
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
     let frame = FramePainter.paint(
-      current,
-      brush: scene.pen.grain,
-      marks: FramePainter.Marks(
-        automatic: scene.pen.automatic,
-        stone: stoneMark(scene.pen, known: current.stoneKnown),
-        paused: scene.pen.paused,
-        width: scene.pen.reach * 2 + 1,
-        theme: scene.pen.theme,
-        progress: scene.progress,
-        fireKnown: current.fireKnown,
-        earning: !scene.pen.freely,
-        codex: scene.pen.codex
-      )
-    )
+      current, brush: scene.pen.grain, marks: marks(scene, board: current))
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
     scene.board = current
     return true
+  }
+
+  private func marks(_ scene: Scene, board: Board) -> FramePainter.Marks {
+    FramePainter.Marks(
+      automatic: scene.pen.automatic,
+      stone: stoneMark(scene.pen, known: board.stoneKnown),
+      paused: scene.pen.paused,
+      width: scene.pen.reach * 2 + 1,
+      theme: scene.pen.theme,
+      progress: scene.progress,
+      fireKnown: board.fireKnown,
+      earning: !scene.pen.freely,
+      codex: scene.pen.codex,
+      confirming: scene.pen.confirming
+    )
   }
 
   private func fits(_ size: (columns: Int, rows: Int)) -> Bool {
@@ -101,7 +104,7 @@ struct SandLoop {
     case .quit:
       return true
     case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely,
-      .theme, .faucet, .codex:
+      .theme, .faucet, .codex, .prestige:
       return false
     }
   }
@@ -168,9 +171,22 @@ struct SandLoop {
     pen: Pen,
     progress: inout Progression
   ) -> Pen {
+    let next = acted(event, to: &board, pen: pen, progress: &progress)
+    if event == .prestige {
+      return next
+    }
+    return resting(next)
+  }
+
+  private func acted(
+    _ event: TerminalEvent,
+    to board: inout Board,
+    pen: Pen,
+    progress: inout Progression
+  ) -> Pen {
     switch event {
-    case .quit, .theme, .faucet, .codex:
-      return tuned(event, pen: pen, progress: &progress)
+    case .quit, .theme, .faucet, .codex, .prestige:
+      return tuned(event, pen: pen, on: &board, progress: &progress)
     case .material(let key):
       return chosen(pen, key: key, known: learned(board), progress: &progress)
     case .clear:
@@ -224,7 +240,12 @@ struct SandLoop {
     )
   }
 
-  private func tuned(_ event: TerminalEvent, pen: Pen, progress: inout Progression) -> Pen {
+  private func tuned(
+    _ event: TerminalEvent,
+    pen: Pen,
+    on board: inout Board,
+    progress: inout Progression
+  ) -> Pen {
     switch event {
     case .theme:
       return recolored(pen)
@@ -232,17 +253,50 @@ struct SandLoop {
       return boughtFaucet(pen, progress: &progress)
     case .codex:
       return paged(pen)
+    case .prestige:
+      return offered(pen, on: &board, progress: &progress)
     case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
       return pen
     }
   }
 
+  private func offered(
+    _ pen: Pen,
+    on board: inout Board,
+    progress: inout Progression
+  ) -> Pen {
+    if pen.freely {
+      return resting(pen)
+    }
+    switch Prestige.asking(pen.confirming, progress: progress) {
+    case .idle:
+      return resting(pen)
+    case .armed:
+      var next = pen
+      next.confirming = true
+      return next
+    case .done(let next):
+      progress = next
+      board.clear()
+      var reset = moved(pen, grain: pen.grain, stroke: nil)
+      reset.handAt = nil
+      return resting(reset)
+    }
+  }
+
+  private func resting(_ pen: Pen) -> Pen {
+    var next = pen
+    next.confirming = false
+    return next
+  }
+
   private func reading(_ event: TerminalEvent, pen: Pen) -> Pen {
+    let pen = resting(pen)
     switch event {
     case .codex:
       return paged(pen)
     case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely,
-      .theme, .faucet:
+      .theme, .faucet, .prestige:
       return pen
     }
   }

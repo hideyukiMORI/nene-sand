@@ -57,7 +57,27 @@ public struct Progression: Equatable, Sendable {
   }
 
   public func worth(_ grain: Grain) -> Int {
-    Price.of(grain)
+    Price.of(grain) * purse.rate()
+  }
+
+  public func prestigeCost() -> Int? {
+    if purse.amount < Prestige.ask {
+      return nil
+    }
+    return Prestige.ask
+  }
+
+  func prestiging() -> Progression {
+    if purse.amount < Prestige.ask {
+      return self
+    }
+    return Progression(
+      purse: purse.paying(purse.amount).quicker(),
+      oil: oil,
+      wood: wood,
+      lava: lava,
+      faucet: false
+    )
   }
 
   public func buying(_ grain: Grain) -> Progression {
