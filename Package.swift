@@ -56,5 +56,10 @@ let package = Package(
       dependencies: ["NeNeSandTerminal"],
       swiftSettings: strictSettings
     ),
+    .testTarget(
+      name: "NeNeSandSaveTests",
+      dependencies: ["NeNeSandCore", "NeNeSandSave"],
+      swiftSettings: strictSettings
+    ),
   ]
 )

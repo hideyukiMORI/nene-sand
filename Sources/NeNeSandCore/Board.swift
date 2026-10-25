@@ -52,6 +52,11 @@ public struct Board {
     return cells[offset]
   }
 
+  public mutating func restore(fire: Bool, stone: Bool) {
+    fireKnown = fire
+    stoneKnown = stone
+  }
+
   public mutating func clear() {
     cells = Array(repeating: .empty, count: cells.count)
     drift = Array(repeating: 0, count: drift.count)

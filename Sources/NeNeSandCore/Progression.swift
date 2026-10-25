@@ -56,6 +56,46 @@ public struct Progression: Equatable, Sendable {
     Price.ask(grain)
   }
 
+  public struct Resume: Equatable, Sendable {
+    public let amount: Int
+    public let rate: Int
+    public let oil: Bool
+    public let wood: Bool
+    public let lava: Bool
+    public let faucet: Bool
+
+    public init(
+      amount: Int, rate: Int, oil: Bool, wood: Bool, lava: Bool, faucet: Bool
+    ) {
+      self.amount = amount
+      self.rate = rate
+      self.oil = oil
+      self.wood = wood
+      self.lava = lava
+      self.faucet = faucet
+    }
+  }
+
+  public enum ResumeOutcome: Equatable, Sendable {
+    case ready(Progression)
+    case rejected
+  }
+
+  public static func resuming(_ resume: Resume) -> ResumeOutcome {
+    if resume.amount < 0 || resume.rate < 1 {
+      return .rejected
+    }
+    return .ready(
+      Progression(
+        purse: Purse.restored(amount: resume.amount, multiplier: resume.rate),
+        oil: resume.oil,
+        wood: resume.wood,
+        lava: resume.lava,
+        faucet: resume.faucet
+      )
+    )
+  }
+
   public func worth(_ grain: Grain) -> Int {
     Price.of(grain) * purse.rate()
   }

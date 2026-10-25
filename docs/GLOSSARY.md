@@ -17,7 +17,7 @@
 | プレステージ | 盤面と通貨と装置を手放して得る恒久倍率 | NeNeSandCore |
 | セル | 半角ブロックで描く 1 マス | NeNeSandRender |
 | 合成ルート | 依存を結ぶ唯一の場所。コマンド名は `nene-sand` | NeNeSandApp |
-| セーブ | 進行の版つき文字列。ファイルの読み書きは合成ルートだけ | NeNeSandSave と NeNeSandApp |
+| セーブ | 進行と、火と石の印の版つき文字列。盤の粒は含まない。ファイルの読み書きは合成ルートだけ | NeNeSandSave と NeNeSandApp |
 | 結果（outcome） | 期待される成功と失敗を表す閉じた型 | `*Outcome` |
 | ポート（port） | 中核がプラットフォームを使うための型のある窓口 | `*Port` |
 | アダプタ（adapter） | ポートの実装 | NeNeSandTerminal と NeNeSandApp |

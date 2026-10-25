@@ -1,6 +1,7 @@
 import Foundation
 import NeNeSandCore
 import NeNeSandRender
+import NeNeSandSave
 import NeNeSandTerminal
 
 struct SandLoop {
@@ -35,19 +36,36 @@ struct SandLoop {
     var previous: Frame?
     var pen = Pen()
     var progress = Progression.beginning
+    var fireKnown = false
+    var stoneKnown = false
     var toldTooSmall = false
     var nextTick: ContinuousClock.Instant
   }
 
   mutating func run() {
+    let opened = SaveStore.opening()
     var session = TerminalSession(trueColor: trueColor)
     guard session.begin() else {
       FileHandle.standardError.write(Data("端末ではない\n".utf8))
       return
     }
-    defer { session.restore() }
     var scene = Scene(nextTick: clock.now)
+    scene.progress = opened.progress
+    scene.fireKnown = opened.fireKnown
+    scene.stoneKnown = opened.stoneKnown
+    defer {
+      session.restore()
+      SaveStore.closing(snapshot(scene))
+    }
     while turn(&session, &scene) {}
+  }
+
+  private func snapshot(_ scene: Scene) -> Archive.Sheet {
+    Archive.Sheet(
+      progress: scene.progress,
+      fireKnown: scene.fireKnown,
+      stoneKnown: scene.stoneKnown
+    )
   }
 
   private mutating func turn(_ session: inout TerminalSession, _ scene: inout Scene) -> Bool {
@@ -66,7 +84,11 @@ struct SandLoop {
       return true
     }
     scene.toldTooSmall = false
+    let born = scene.board == nil
     var current = resized(scene.board, to: size)
+    if born {
+      current.restore(fire: scene.fireKnown, stone: scene.stoneKnown)
+    }
     scene.pen = apply(events, to: &current, pen: scene.pen, progress: &scene.progress)
     if !scene.pen.paused && !scene.pen.codex && clock.now >= scene.nextTick {
       step(&current, pen: &scene.pen, progress: &scene.progress)
@@ -77,6 +99,8 @@ struct SandLoop {
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
     scene.board = current
+    scene.fireKnown = current.fireKnown
+    scene.stoneKnown = current.stoneKnown
     return true
   }
 
