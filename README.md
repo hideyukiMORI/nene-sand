@@ -13,17 +13,27 @@
 Ubuntu 22.04 以降の x86_64。Swift は要らない。
 
 ```bash
-mkdir -p ~/.local/bin
-curl -fsSL -o ~/.local/bin/nene-sand \
-  https://github.com/hideyukiMORI/nene-sand/releases/download/v0.1.0/nene-sand-linux-x86_64
-chmod +x ~/.local/bin/nene-sand
-export PATH="$HOME/.local/bin:$PATH"
-nene-sand
+curl -fsSL https://raw.githubusercontent.com/hideyukiMORI/nene-sand/main/install.sh | bash
 ```
 
-`~/.local/bin` は、多くの Ubuntu で次のログインから PATH に入る。入らないときは、上の `export` をシェルの設定に残す。
+最新の [Release](https://github.com/hideyukiMORI/nene-sand/releases/latest) を取り、`SHA256SUMS` が合ってから `~/.local/bin/nene-sand` に置く。合わなければ何も置かない。スクリプトは [install.sh](install.sh)。実行する前に読める。
+
+`~/.local/bin` が PATH に無いときは、その旨を出して終わる。多くの Ubuntu では、次のログインから入る。消すときは `rm ~/.local/bin/nene-sand`。
 
 実行ファイルは Swift の標準ライブラリを中に持っている。外につながっているのは libc と libstdc++ と libgcc と libm だけである。
+
+<details>
+<summary>自分で置く</summary>
+
+```bash
+v=0.1.0
+curl -fsSL -O https://github.com/hideyukiMORI/nene-sand/releases/download/v$v/nene-sand-linux-x86_64 \
+           -O https://github.com/hideyukiMORI/nene-sand/releases/download/v$v/SHA256SUMS
+sha256sum --check SHA256SUMS
+install -Dm755 nene-sand-linux-x86_64 ~/.local/bin/nene-sand
+```
+
+</details>
 
 ## 操作
 
