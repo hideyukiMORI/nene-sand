@@ -49,6 +49,12 @@ public struct Board {
     return cells[offset]
   }
 
+  public mutating func clear() {
+    cells = Array(repeating: .empty, count: cells.count)
+    drift = Array(repeating: 0, count: drift.count)
+    age = Array(repeating: 0, count: age.count)
+  }
+
   public mutating func stamp(x: Int, y: Int, grain: Grain = .sand) {
     guard let offset = offset(x: x, y: y) else {
       return
