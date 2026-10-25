@@ -70,7 +70,8 @@ struct SandLoop {
     let frame = FramePainter.paint(
       current,
       brush: scene.pen.grain,
-      automatic: scene.pen.automatic
+      automatic: scene.pen.automatic,
+      stoneKnown: current.stoneKnown
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
@@ -115,6 +116,9 @@ struct SandLoop {
     case .quit:
       return pen
     case .material(let key):
+      if key == .stone && !board.stoneKnown {
+        return pen
+      }
       var next = moved(pen, grain: grain(for: key), stroke: nil)
       next.handAt = nil
       return next
@@ -182,6 +186,8 @@ struct SandLoop {
       return .wood
     case .lava:
       return .lava
+    case .stone:
+      return .stone
     }
   }
 

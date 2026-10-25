@@ -18,6 +18,8 @@ public struct AutomaticStroke: Sendable {
       return .lava
     case .lava:
       return .sand
+    case .stone:
+      return .sand
     case .empty:
       return .sand
     }

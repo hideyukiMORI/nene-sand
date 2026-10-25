@@ -3,7 +3,7 @@ enum OilMotion {
     switch destination {
     case .empty:
       return true
-    case .oil, .water, .sand, .fire, .wood, .lava:
+    case .oil, .water, .sand, .fire, .wood, .lava, .stone:
       return false
     }
   }

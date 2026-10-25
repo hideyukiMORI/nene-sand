@@ -7,7 +7,7 @@ enum LavaMotion {
     switch destination {
     case .empty:
       return true
-    case .lava, .sand, .water, .oil, .fire, .wood:
+    case .lava, .sand, .water, .oil, .fire, .wood, .stone:
       return false
     }
   }

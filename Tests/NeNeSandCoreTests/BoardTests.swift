@@ -247,16 +247,6 @@ struct BoardTests {
   }
 
   @Test
-  func waterRestsOnLava() {
-    var board = Board(width: 1, height: 2)
-    board.stamp(x: 0, y: 0, grain: .water)
-    board.stamp(x: 0, y: 1, grain: .lava)
-    board.tick()
-    #expect(board.grain(x: 0, y: 0) == .water)
-    #expect(board.grain(x: 0, y: 1) == .lava)
-  }
-
-  @Test
   func lavaIgnitesOilAndWood() {
     var board = Board(width: 3, height: 1)
     board.stamp(x: 0, y: 0, grain: .oil)
@@ -266,6 +256,90 @@ struct BoardTests {
     #expect(board.grain(x: 0, y: 0) == .fire)
     #expect(board.grain(x: 1, y: 0) == .lava)
     #expect(board.grain(x: 2, y: 0) == .fire)
+  }
+
+  @Test
+  func waterTurnsTouchedLavaIntoStone() {
+    var board = Board(width: 2, height: 1)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 1, y: 0, grain: .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 1, y: 0) == .stone)
+    #expect(board.stoneKnown)
+  }
+
+  @Test
+  func waterRestsOnTheStoneItMade() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 0, y: 1, grain: .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 0, y: 1) == .stone)
+  }
+
+  @Test
+  func waterDoesNotStoneLavaAcrossACorner() {
+    var board = Board(width: 2, height: 2)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 1, y: 1, grain: .lava)
+    board.tick()
+    #expect(board.count(of: .stone) == 0)
+    #expect(board.stoneKnown == false)
+  }
+
+  @Test
+  func stoneStaysKnownAfterResizeDropsIt() {
+    var board = Board(width: 2, height: 1)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 1, y: 0, grain: .lava)
+    board.tick()
+    let kept = Board(width: 1, height: 1, keeping: board)
+    #expect(kept.stoneKnown)
+    #expect(kept.count(of: .stone) == 0)
+  }
+
+  @Test
+  func stoneFallsAndRestsOnSand() {
+    var falling = Board(width: 1, height: 4)
+    falling.stamp(x: 0, y: 0, grain: .stone)
+    falling.tick()
+    #expect(falling.grain(x: 0, y: 1) == .stone)
+    falling.tick()
+    #expect(falling.grain(x: 0, y: 2) == .stone)
+    var piled = Board(width: 1, height: 2)
+    piled.stamp(x: 0, y: 0, grain: .stone)
+    piled.stamp(x: 0, y: 1, grain: .sand)
+    piled.tick()
+    #expect(piled.grain(x: 0, y: 0) == .stone)
+    #expect(piled.grain(x: 0, y: 1) == .sand)
+  }
+
+  @Test
+  func stoneRestsOnStoneAndWood() {
+    var stacked = Board(width: 1, height: 2)
+    stacked.stamp(x: 0, y: 0, grain: .stone)
+    stacked.stamp(x: 0, y: 1, grain: .stone)
+    stacked.tick()
+    #expect(stacked.grain(x: 0, y: 0) == .stone)
+    #expect(stacked.grain(x: 0, y: 1) == .stone)
+    var onWood = Board(width: 1, height: 2)
+    onWood.stamp(x: 0, y: 0, grain: .stone)
+    onWood.stamp(x: 0, y: 1, grain: .wood)
+    onWood.tick()
+    #expect(onWood.grain(x: 0, y: 0) == .stone)
+    #expect(onWood.grain(x: 0, y: 1) == .wood)
+  }
+
+  @Test
+  func stoneSinksThroughWater() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .stone)
+    board.stamp(x: 0, y: 1, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 0, y: 1) == .stone)
   }
 
   @Test

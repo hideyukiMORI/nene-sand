@@ -9,5 +9,6 @@ struct Reaction: Equatable {
     Reaction(source: .fire, target: .wood, product: .fire),
     Reaction(source: .lava, target: .oil, product: .fire),
     Reaction(source: .lava, target: .wood, product: .fire),
+    Reaction(source: .water, target: .lava, product: .stone),
   ]
 }

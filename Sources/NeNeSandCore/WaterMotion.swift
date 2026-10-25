@@ -3,7 +3,7 @@ enum WaterMotion {
     switch destination {
     case .empty, .oil:
       return true
-    case .water, .sand, .fire, .wood, .lava:
+    case .water, .sand, .fire, .wood, .lava, .stone:
       return false
     }
   }
