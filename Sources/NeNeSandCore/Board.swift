@@ -56,6 +56,7 @@ public struct Board {
   }
 
   public mutating func tick() {
+    react()
     var settled = Array(repeating: false, count: cells.count)
     let columns = columnOrder()
     let bias = step % 2 == 0 ? -1 : 1
@@ -69,6 +70,60 @@ public struct Board {
     closeBuriedGaps()
     ageFire()
     step += 1
+  }
+
+  private mutating func react() {
+    let products = reactionProducts()
+    var index = 0
+    while index < products.count {
+      if let product = products[index] {
+        cells[index] = product
+        drift[index] = 0
+        age[index] = 0
+      }
+      index += 1
+    }
+  }
+
+  private func reactionProducts() -> [Grain?] {
+    var products: [Grain?] = Array(repeating: nil, count: cells.count)
+    var index = 0
+    while index < cells.count {
+      products[index] = product(at: index)
+      index += 1
+    }
+    return products
+  }
+
+  private func product(at index: Int) -> Grain? {
+    let target = cells[index]
+    var row = 0
+    while row < Reaction.rows.count {
+      let rule = Reaction.rows[row]
+      if rule.target == target && touches(index, source: rule.source) {
+        return rule.product
+      }
+      row += 1
+    }
+    return nil
+  }
+
+  private func touches(_ index: Int, source: Grain) -> Bool {
+    let x = index % width
+    let y = index / width
+    if grain(x: x - 1, y: y) == source {
+      return true
+    }
+    if grain(x: x + 1, y: y) == source {
+      return true
+    }
+    if grain(x: x, y: y - 1) == source {
+      return true
+    }
+    if grain(x: x, y: y + 1) == source {
+      return true
+    }
+    return false
   }
 
   public func count(of grain: Grain) -> Int {

@@ -158,6 +158,73 @@ struct BoardTests {
   }
 
   @Test
+  func fireIgnitesTheNextOilOnly() {
+    var board = Board(width: 3, height: 1)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    board.stamp(x: 1, y: 0, grain: .oil)
+    board.stamp(x: 2, y: 0, grain: .oil)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .fire)
+    #expect(board.grain(x: 1, y: 0) == .fire)
+    #expect(board.grain(x: 2, y: 0) == .oil)
+  }
+
+  @Test
+  func fireIgnitesWood() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .wood)
+    board.stamp(x: 0, y: 1, grain: .fire)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .fire)
+    #expect(board.grain(x: 0, y: 1) == .fire)
+  }
+
+  @Test
+  func waterPutsFireOut() {
+    var board = Board(width: 2, height: 1)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    board.stamp(x: 1, y: 0, grain: .water)
+    board.tick()
+    #expect(board.count(of: .fire) == 0)
+    #expect(board.count(of: .water) == 1)
+  }
+
+  @Test
+  func fireDoesNotIgniteSand() {
+    var board = Board(width: 2, height: 1)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    board.stamp(x: 1, y: 0, grain: .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .fire)
+    #expect(board.grain(x: 1, y: 0) == .sand)
+  }
+
+  @Test
+  func fireDoesNotIgniteAcrossACorner() {
+    var board = Board(width: 2, height: 2)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    board.stamp(x: 0, y: 1, grain: .sand)
+    board.stamp(x: 1, y: 0, grain: .sand)
+    board.stamp(x: 1, y: 1, grain: .oil)
+    board.tick()
+    #expect(board.count(of: .fire) == 1)
+    #expect(board.count(of: .oil) == 1)
+  }
+
+  @Test
+  func dyingFireStillIgnitesOil() {
+    var board = Board(width: 3, height: 1)
+    board.stamp(x: 0, y: 0, grain: .oil)
+    board.stamp(x: 1, y: 0, grain: .fire)
+    board.stamp(x: 2, y: 0, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .fire)
+    #expect(board.grain(x: 1, y: 0) == .water)
+    #expect(board.count(of: .fire) == 1)
+    #expect(board.count(of: .water) == 1)
+  }
+
+  @Test
   func woodStaysInTheAir() {
     var board = Board(width: 1, height: 4)
     board.stamp(x: 0, y: 0, grain: .wood)
