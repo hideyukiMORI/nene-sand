@@ -21,6 +21,7 @@ private func signalByte(_ value: UInt8) {
 public struct TerminalSession {
   public let trueColor: Bool
   private var saved = termios()
+  private var savedFlags: Int32?
   private var active = false
   private var wakeRead: Int32 = -1
   private var wakeWriteEnd: Int32 = -1
@@ -126,12 +127,19 @@ public struct TerminalSession {
     raw.c_cc.5 = 0
     _ = tcsetattr(STDIN_FILENO, TCSANOW, &raw)
     let flags = fcntl(STDIN_FILENO, F_GETFL)
-    _ = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK)
+    if flags >= 0 {
+      savedFlags = flags
+      _ = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK)
+    }
   }
 
-  private func disableRaw() {
+  private mutating func disableRaw() {
     var copy = saved
-    _ = tcsetattr(STDIN_FILENO, TCSANOW, &copy)
+    _ = tcsetattr(STDIN_FILENO, TCSAFLUSH, &copy)
+    if let flags = savedFlags {
+      _ = fcntl(STDIN_FILENO, F_SETFL, flags)
+      savedFlags = nil
+    }
   }
 
   private func enterScreen() {

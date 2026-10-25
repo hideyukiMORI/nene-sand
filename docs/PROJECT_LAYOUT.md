@@ -84,7 +84,7 @@ NeNeSandApp
 
 ### `NeNeSandTerminal`
 
-Glibc の termios / ioctl / signal を薄く包む。決定性の禁止は免除しない。マウス報告は終了時に必ず解除する。
+Glibc の termios / ioctl / signal を薄く包む。決定性の禁止は免除しない。マウス報告は終了時に必ず解除する。標準入力のフラグも、開始時の値へ戻す。
 
 ### `NeNeSandApp`
 
