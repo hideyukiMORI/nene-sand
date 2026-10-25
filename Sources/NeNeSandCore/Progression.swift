@@ -73,13 +73,42 @@ public struct Progression: Equatable, Sendable {
   }
 
   public func following(_ grain: Grain, fire: Bool = false) -> Grain {
+    walking(grain, fire: fire, spend: false).grain
+  }
+
+  public func advancing(_ grain: Grain, fire: Bool = false) -> (
+    progress: Progression, grain: Grain
+  ) {
+    walking(grain, fire: fire, spend: true)
+  }
+
+  private func walking(
+    _ grain: Grain,
+    fire: Bool,
+    spend: Bool
+  ) -> (progress: Progression, grain: Grain) {
+    var progress = self
     var next = AutomaticStroke.nextBrush(grain)
     var tries = 0
-    while !draws(next, fire: fire) && tries < 8 {
+    while tries < 8 && !progress.draws(next, fire: fire) {
+      if spend && progress.affordable(next) {
+        progress = progress.buying(next)
+        break
+      }
       next = AutomaticStroke.nextBrush(next)
       tries += 1
     }
-    return next
+    if spend {
+      progress = progress.buyingFaucet()
+    }
+    return (progress, next)
+  }
+
+  private func affordable(_ grain: Grain) -> Bool {
+    guard let ask = cost(grain) else {
+      return false
+    }
+    return purse.amount >= ask
   }
 
   private func draws(_ grain: Grain, fire: Bool) -> Bool {

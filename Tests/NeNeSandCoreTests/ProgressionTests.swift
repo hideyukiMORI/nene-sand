@@ -53,6 +53,34 @@ struct ProgressionTests {
   }
 
   @Test
+  func automaticBuysTheNextGrainAndTheFaucet() {
+    let start = Progression.beginning
+    let poor = start.advancing(.water)
+    #expect(poor.grain == .sand)
+    #expect(poor.progress.purse.amount == 0)
+    #expect(!poor.progress.ownsFaucet())
+    let oilPurse = Purse.zero.collecting(.lava).collecting(.wood)
+    let oil = start.holding(oilPurse).advancing(.water)
+    #expect(oil.grain == .oil)
+    #expect(oil.progress.owns(.oil))
+    #expect(oil.progress.purse.amount == 0)
+    let woodPurse = Purse.zero.collecting(.oil).collecting(.stone)
+    let wood = start.holding(woodPurse).advancing(.water)
+    #expect(wood.grain == .wood)
+    #expect(wood.progress.owns(.wood))
+    let kept = start.holding(oilPurse)
+    #expect(kept.following(.water) == .sand)
+    #expect(kept.purse.amount == oilPurse.amount)
+    let rich = start.holding(
+      Purse.zero.collecting(.lava).collecting(.lava).collecting(.lava).collecting(.stone)
+    )
+    let both = rich.advancing(.water)
+    #expect(both.grain == .oil)
+    #expect(both.progress.ownsFaucet())
+    #expect(both.progress.purse.amount == 0)
+  }
+
+  @Test
   func faucetCostsSixtyOnce() {
     let poor = Progression.beginning.buyingFaucet()
     #expect(!poor.ownsFaucet())
