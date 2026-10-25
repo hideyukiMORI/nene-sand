@@ -63,33 +63,12 @@ public enum FramePainter {
     }
     return Glyph(
       shape: .upperHalf,
-      foreground: color(top, theme: theme),
-      background: color(bottom, theme: theme)
+      foreground: theme.ink(top),
+      background: theme.ink(bottom)
     )
   }
 
   private static func blank(_ theme: Theme) -> Glyph {
     Glyph(shape: .blank, foreground: theme.ground(), background: theme.ground())
-  }
-
-  private static func color(_ grain: Grain, theme: Theme) -> CellColor {
-    switch grain {
-    case .empty:
-      return theme.ground()
-    case .sand:
-      return Theme.sand
-    case .water:
-      return Theme.water
-    case .oil:
-      return Theme.oil
-    case .fire:
-      return Theme.fire
-    case .wood:
-      return Theme.wood
-    case .lava:
-      return Theme.lava
-    case .stone:
-      return Theme.stone
-    }
   }
 }

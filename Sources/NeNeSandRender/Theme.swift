@@ -1,14 +1,8 @@
+import NeNeSandCore
+
 public enum Theme: Equatable, Sendable {
   case phosphor
   case amber
-
-  public static let sand = CellColor(red: 214, green: 176, blue: 92)
-  public static let water = CellColor(red: 64, green: 156, blue: 214)
-  public static let oil = CellColor(red: 168, green: 124, blue: 36)
-  public static let fire = CellColor(red: 228, green: 88, blue: 32)
-  public static let wood = CellColor(red: 112, green: 78, blue: 42)
-  public static let lava = CellColor(red: 196, green: 48, blue: 24)
-  public static let stone = CellColor(red: 132, green: 136, blue: 144)
 
   public func next() -> Theme {
     switch self {
@@ -27,6 +21,27 @@ public enum Theme: Equatable, Sendable {
     chrome.accent
   }
 
+  public func ink(_ grain: Grain) -> CellColor {
+    switch grain {
+    case .empty:
+      return ground()
+    case .sand:
+      return chrome.sand
+    case .water:
+      return chrome.water
+    case .oil:
+      return chrome.oil
+    case .fire:
+      return chrome.fire
+    case .wood:
+      return chrome.wood
+    case .lava:
+      return chrome.lava
+    case .stone:
+      return chrome.stone
+    }
+  }
+
   struct Chrome: Equatable {
     let ground: CellColor
     let frame: CellColor
@@ -38,6 +53,13 @@ public enum Theme: Equatable, Sendable {
     let auto: CellColor
     let free: CellColor
     let select: CellColor
+    let sand: CellColor
+    let water: CellColor
+    let oil: CellColor
+    let fire: CellColor
+    let wood: CellColor
+    let lava: CellColor
+    let stone: CellColor
   }
 
   var chrome: Chrome {
@@ -60,7 +82,14 @@ public enum Theme: Equatable, Sendable {
       hold: CellColor(red: 255, green: 181, blue: 71),
       auto: CellColor(red: 92, green: 200, blue: 255),
       free: CellColor(red: 183, green: 156, blue: 255),
-      select: CellColor(red: 24, green: 33, blue: 31)
+      select: CellColor(red: 24, green: 33, blue: 31),
+      sand: CellColor(red: 214, green: 176, blue: 92),
+      water: CellColor(red: 64, green: 156, blue: 214),
+      oil: CellColor(red: 168, green: 124, blue: 36),
+      fire: CellColor(red: 228, green: 88, blue: 32),
+      wood: CellColor(red: 112, green: 78, blue: 42),
+      lava: CellColor(red: 196, green: 48, blue: 24),
+      stone: CellColor(red: 132, green: 136, blue: 144)
     )
   }
 
@@ -75,7 +104,14 @@ public enum Theme: Equatable, Sendable {
       hold: CellColor(red: 255, green: 214, blue: 120),
       auto: CellColor(red: 255, green: 112, blue: 48),
       free: CellColor(red: 255, green: 154, blue: 168),
-      select: CellColor(red: 46, green: 28, blue: 12)
+      select: CellColor(red: 46, green: 28, blue: 12),
+      sand: CellColor(red: 236, green: 196, blue: 72),
+      water: CellColor(red: 48, green: 128, blue: 200),
+      oil: CellColor(red: 168, green: 104, blue: 24),
+      fire: CellColor(red: 255, green: 96, blue: 24),
+      wood: CellColor(red: 128, green: 76, blue: 36),
+      lava: CellColor(red: 208, green: 40, blue: 24),
+      stone: CellColor(red: 156, green: 140, blue: 124)
     )
   }
 }
