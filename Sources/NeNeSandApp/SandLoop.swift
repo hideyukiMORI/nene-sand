@@ -178,6 +178,8 @@ struct SandLoop {
       return .oil
     case .fire:
       return .fire
+    case .wood:
+      return .wood
     }
   }
 

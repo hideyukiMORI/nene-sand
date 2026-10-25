@@ -3,4 +3,5 @@ public enum BrushKey: Equatable, Sendable {
   case water
   case oil
   case fire
+  case wood
 }

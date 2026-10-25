@@ -174,7 +174,7 @@ public struct Board {
         return .found(y)
       }
       return .skip
-    case .sand, .fire:
+    case .sand, .fire, .wood:
       if seenOil {
         return .blocked
       }
@@ -371,7 +371,7 @@ public struct Board {
       }
       top -= 1
     }
-    guard let cap = offset(x: x, y: top - 1), cells[cap] != .empty else {
+    guard let cap = offset(x: x, y: top - 1), fallsIntoGaps(cells[cap]) else {
       return nil
     }
     return top
@@ -380,7 +380,7 @@ public struct Board {
   private mutating func dropStack(x: Int, gapTop: Int, length: Int) {
     let stackBottom = gapTop - 1
     var stackTop = stackBottom
-    while stackTop > 0 && grain(x: x, y: stackTop - 1) != .empty {
+    while stackTop > 0 && fallsIntoGaps(grain(x: x, y: stackTop - 1)) {
       stackTop -= 1
     }
     var y = stackBottom
@@ -392,6 +392,15 @@ public struct Board {
       writeAge(x: x, y: y + length, age: carriedAge)
       place(x: x, y: y, grain: .empty, drift: 0)
       y -= 1
+    }
+  }
+
+  private func fallsIntoGaps(_ grain: Grain) -> Bool {
+    switch grain {
+    case .sand, .water, .oil, .fire:
+      return true
+    case .empty, .wood:
+      return false
     }
   }
 

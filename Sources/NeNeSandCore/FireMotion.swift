@@ -13,7 +13,7 @@ enum FireMotion {
     switch destination {
     case .empty:
       return true
-    case .fire, .sand, .water, .oil:
+    case .fire, .sand, .water, .oil, .wood:
       return false
     }
   }
