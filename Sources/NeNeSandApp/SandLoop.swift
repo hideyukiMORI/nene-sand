@@ -87,7 +87,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic:
+    case .press, .drag, .release, .material, .automatic, .clear:
       return false
     }
   }
@@ -120,6 +120,11 @@ struct SandLoop {
         return pen
       }
       var next = moved(pen, grain: grain(for: key), stroke: nil)
+      next.handAt = nil
+      return next
+    case .clear:
+      board.clear()
+      var next = moved(pen, grain: pen.grain, stroke: nil)
       next.handAt = nil
       return next
     case .automatic:

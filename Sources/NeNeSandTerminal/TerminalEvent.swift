@@ -10,4 +10,5 @@ public enum TerminalEvent: Equatable, Sendable {
   case release(Cursor, Pointer)
   case material(BrushKey)
   case automatic
+  case clear
 }

@@ -29,6 +29,13 @@ struct MouseParserTests {
   }
 
   @Test
+  func cClearsTheBoard() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: "c")]) == [.clear])
+    #expect(parser.feed([UInt8(ascii: "C")]) == [.clear])
+  }
+
+  @Test
   func aTogglesAutomatic() {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: "a")]) == [.automatic])
