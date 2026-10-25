@@ -130,12 +130,12 @@ struct SandLoop {
         hand: AutomaticStroke(),
         handAt: nil
       )
-    case .press(let cursor):
-      stampCell(cursor, grain: pen.grain, on: &board)
+    case .press(let cursor, let pointer):
+      stampCell(cursor, grain: ink(pointer, pen: pen), on: &board)
       return moved(pen, grain: pen.grain, stroke: cursor)
-    case .drag(let cursor):
+    case .drag(let cursor, let pointer):
       let start = pen.stroke ?? cursor
-      connect(from: start, to: cursor, grain: pen.grain, on: &board)
+      connect(from: start, to: cursor, grain: ink(pointer, pen: pen), on: &board)
       return moved(pen, grain: pen.grain, stroke: cursor)
     case .release:
       return moved(pen, grain: pen.grain, stroke: nil)
@@ -170,6 +170,15 @@ struct SandLoop {
     }
     next.handAt = cursor
     return next
+  }
+
+  private func ink(_ pointer: TerminalEvent.Pointer, pen: Pen) -> Grain {
+    switch pointer {
+    case .draw:
+      return pen.grain
+    case .erase:
+      return .empty
+    }
   }
 
   private func grain(for key: BrushKey) -> Grain {

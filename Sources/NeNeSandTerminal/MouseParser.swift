@@ -119,16 +119,26 @@ public struct MouseParser {
   }
 
   private func buttonEvent(button: Int, pressed: Bool, cursor: Cursor) -> TerminalEvent? {
-    let kind = button & 3
-    if kind != 0 {
+    guard let pointer = pointer(of: button) else {
       return nil
     }
     if button & 32 != 0 {
-      return .drag(cursor)
+      return .drag(cursor, pointer)
     }
     if pressed {
-      return .press(cursor)
+      return .press(cursor, pointer)
     }
-    return .release(cursor)
+    return .release(cursor, pointer)
+  }
+
+  private func pointer(of button: Int) -> TerminalEvent.Pointer? {
+    let kind = button & 3
+    if kind == 0 {
+      return .draw
+    }
+    if kind == 2 {
+      return .erase
+    }
+    return nil
   }
 }
