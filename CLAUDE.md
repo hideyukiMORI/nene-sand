@@ -91,4 +91,4 @@ Waivers: none | WVR-NNNN
 
 現在のタスクは [docs/todo/current.md](docs/todo/current.md)。GitHub Issue が正で、そこは要約。
 
-動くのは `make check` と、砂と水を描いて落とす版である。`a` で自動描画を切り替える。油、火、木、溶岩、反応、進行、セーブはまだ無い。
+動くのは `make check` と、砂と水を描いて落とす版である。`a` で自動描画を切り替え、砂と水が線ごとに入れ替わる。油、火、木、溶岩、反応、進行、セーブはまだ無い。

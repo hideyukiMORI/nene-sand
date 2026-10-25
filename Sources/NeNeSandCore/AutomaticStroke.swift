@@ -4,6 +4,17 @@ public struct AutomaticStroke: Sendable {
   private var serial: Int
   private var resting: Bool
 
+  public static func nextBrush(_ grain: Grain) -> Grain {
+    switch grain {
+    case .sand:
+      return .water
+    case .water:
+      return .sand
+    case .empty:
+      return .sand
+    }
+  }
+
   public init() {
     path = []
     index = 0

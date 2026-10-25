@@ -152,6 +152,9 @@ struct SandLoop {
     var next = pen
     let rows = board.height / 2
     guard let point = next.hand.next(width: board.width, height: rows) else {
+      if next.handAt != nil {
+        next.grain = AutomaticStroke.nextBrush(next.grain)
+      }
       next.handAt = nil
       return next
     }

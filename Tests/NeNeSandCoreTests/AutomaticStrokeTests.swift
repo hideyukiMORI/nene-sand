@@ -46,6 +46,13 @@ struct AutomaticStrokeTests {
   }
 
   @Test
+  func brushAlternatesSandAndWater() {
+    #expect(AutomaticStroke.nextBrush(.sand) == .water)
+    #expect(AutomaticStroke.nextBrush(.water) == .sand)
+    #expect(AutomaticStroke.nextBrush(.empty) == .sand)
+  }
+
+  @Test
   func emptyFieldDrawsNothing() {
     var stroke = AutomaticStroke()
     #expect(stroke.next(width: 0, height: 4) == nil)
