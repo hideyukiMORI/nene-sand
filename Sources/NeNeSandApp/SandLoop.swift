@@ -32,7 +32,7 @@ struct SandLoop {
     var board: Board?
     var previous: Frame?
     var pen = Pen()
-    var purse = Purse.zero
+    var progress = Progression.beginning
     var toldTooSmall = false
     var nextTick: ContinuousClock.Instant
   }
@@ -65,9 +65,9 @@ struct SandLoop {
     }
     scene.toldTooSmall = false
     var current = resized(scene.board, to: size)
-    scene.pen = apply(events, to: &current, pen: scene.pen)
+    scene.pen = apply(events, to: &current, pen: scene.pen, progress: &scene.progress)
     if !scene.pen.paused && clock.now >= scene.nextTick {
-      step(&current, pen: &scene.pen, purse: &scene.purse)
+      step(&current, pen: &scene.pen, progress: &scene.progress)
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
     let frame = FramePainter.paint(
@@ -79,7 +79,7 @@ struct SandLoop {
         paused: scene.pen.paused,
         width: scene.pen.reach * 2 + 1,
         theme: scene.pen.theme,
-        purse: scene.purse,
+        progress: scene.progress,
         earning: !scene.pen.freely
       )
     )
@@ -102,13 +102,13 @@ struct SandLoop {
     }
   }
 
-  private func step(_ board: inout Board, pen: inout Pen, purse: inout Purse) {
+  private func step(_ board: inout Board, pen: inout Pen, progress: inout Progression) {
     if pen.automatic {
-      pen = follow(pen, on: &board)
+      pen = follow(pen, on: &board, progress: progress)
     }
-    let gathered = earned(board, pen: pen, purse: purse)
+    let gathered = earned(board, pen: pen, purse: progress.purse)
     board = gathered.board
-    purse = gathered.purse
+    progress = progress.holding(gathered.purse)
     board.tick()
   }
 
@@ -130,20 +130,30 @@ struct SandLoop {
     return Board(width: size.columns, height: height, keeping: board)
   }
 
-  private func apply(_ events: [TerminalEvent], to board: inout Board, pen: Pen) -> Pen {
+  private func apply(
+    _ events: [TerminalEvent],
+    to board: inout Board,
+    pen: Pen,
+    progress: inout Progression
+  ) -> Pen {
     var next = pen
     for event in events {
-      next = applyOne(event, to: &board, pen: next)
+      next = applyOne(event, to: &board, pen: next, progress: &progress)
     }
     return next
   }
 
-  private func applyOne(_ event: TerminalEvent, to board: inout Board, pen: Pen) -> Pen {
+  private func applyOne(
+    _ event: TerminalEvent,
+    to board: inout Board,
+    pen: Pen,
+    progress: inout Progression
+  ) -> Pen {
     switch event {
     case .quit, .theme:
       return tuned(event, pen: pen)
     case .material(let key):
-      return chosen(pen, key: key, known: board.stoneKnown)
+      return chosen(pen, key: key, known: board.stoneKnown, progress: &progress)
     case .clear:
       board.clear()
       var next = moved(pen, grain: pen.grain, stroke: nil)
@@ -154,7 +164,7 @@ struct SandLoop {
     case .brush(let delta):
       return sized(pen, delta: delta)
     case .freely:
-      return freed(pen, known: board.stoneKnown)
+      return freed(pen, known: board.stoneKnown, progress: progress)
     case .automatic:
       return Pen(
         grain: pen.grain,
@@ -208,12 +218,12 @@ struct SandLoop {
     return next
   }
 
-  private func follow(_ pen: Pen, on board: inout Board) -> Pen {
+  private func follow(_ pen: Pen, on board: inout Board, progress: Progression) -> Pen {
     var next = pen
     let rows = board.height / 2
     guard let point = next.hand.next(width: board.width, height: rows) else {
       if next.handAt != nil {
-        next.grain = AutomaticStroke.nextBrush(next.grain)
+        next.grain = cycled(next, progress: progress)
       }
       next.handAt = nil
       return next
@@ -262,26 +272,81 @@ struct SandLoop {
     var reach: Int
   }
 
-  private func chosen(_ pen: Pen, key: BrushKey, known: Bool) -> Pen {
-    if key == .stone && !allowsStone(pen, known: known) {
+  private func chosen(
+    _ pen: Pen,
+    key: BrushKey,
+    known: Bool,
+    progress: inout Progression
+  ) -> Pen {
+    let grain = grain(for: key)
+    if pen.freely {
+      return picked(pen, grain)
+    }
+    if forSale(key) {
+      return bought(pen, grain, progress: &progress)
+    }
+    return held(pen, grain, known: known)
+  }
+
+  private func forSale(_ key: BrushKey) -> Bool {
+    switch key {
+    case .oil, .wood, .lava:
+      return true
+    case .sand, .water, .fire, .stone:
+      return false
+    }
+  }
+
+  private func held(_ pen: Pen, _ grain: Grain, known: Bool) -> Pen {
+    if grain == .fire {
       return pen
     }
-    var next = moved(pen, grain: grain(for: key), stroke: nil)
+    if grain == .stone && !known {
+      return pen
+    }
+    return picked(pen, grain)
+  }
+
+  private func bought(_ pen: Pen, _ grain: Grain, progress: inout Progression) -> Pen {
+    if progress.owns(grain) {
+      return picked(pen, grain)
+    }
+    let next = progress.buying(grain)
+    if !next.owns(grain) {
+      return pen
+    }
+    progress = next
+    return picked(pen, grain)
+  }
+
+  private func picked(_ pen: Pen, _ grain: Grain) -> Pen {
+    var next = moved(pen, grain: grain, stroke: nil)
     next.handAt = nil
     return next
   }
 
-  private func freed(_ pen: Pen, known: Bool) -> Pen {
+  private func freed(_ pen: Pen, known: Bool, progress: Progression) -> Pen {
     var next = pen
     next.freely.toggle()
-    if next.grain == .stone && !allowsStone(next, known: known) {
-      next.grain = .sand
+    if next.freely || keeps(next.grain, known: known, progress: progress) {
+      return next
     }
+    next.grain = .sand
     return next
   }
 
-  private func allowsStone(_ pen: Pen, known: Bool) -> Bool {
-    pen.freely || known
+  private func keeps(_ grain: Grain, known: Bool, progress: Progression) -> Bool {
+    if grain == .stone {
+      return known
+    }
+    return progress.owns(grain)
+  }
+
+  private func cycled(_ pen: Pen, progress: Progression) -> Grain {
+    if pen.freely {
+      return AutomaticStroke.nextBrush(pen.grain)
+    }
+    return progress.following(pen.grain)
   }
 
   private func stoneMark(_ pen: Pen, known: Bool) -> FramePainter.StoneMark {

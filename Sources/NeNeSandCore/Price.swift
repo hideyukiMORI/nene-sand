@@ -19,4 +19,17 @@ enum Price {
       return 32
     }
   }
+
+  static func ask(_ grain: Grain) -> Int? {
+    switch grain {
+    case .wood:
+      return 20
+    case .oil:
+      return 40
+    case .lava:
+      return 80
+    case .empty, .sand, .water, .fire, .stone:
+      return nil
+    }
+  }
 }
