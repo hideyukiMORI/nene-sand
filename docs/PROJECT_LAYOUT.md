@@ -7,7 +7,7 @@
 
 時刻を読んでよい区画と、ファイルを読んでよい区画は同じ NeNeSandApp である。節は 1 つに畳む。NeNeSandSave は進行と文字列の変換だけで、ファイルを知らない。
 
-NeNeSandSave は空の enum のままである。意味のある型を置く変更で、その空の enum は消す。Core、Render、Terminal、App は砂の最小版を持つ。
+NeNeSandSave は空の enum のままである。意味のある型を置く変更で、その空の enum は消す。Core、Render、Terminal、App は砂と水を持つ。
 
 ---
 

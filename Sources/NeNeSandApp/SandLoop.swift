@@ -15,10 +15,15 @@ struct SandLoop {
     self.trueColor = trueColor
   }
 
+  private struct Pen {
+    var grain: Grain = .sand
+    var stroke: Cursor?
+  }
+
   private struct Scene {
     var board: Board?
     var previous: Frame?
-    var stroke: Cursor?
+    var pen = Pen()
     var toldTooSmall = false
     var nextTick: ContinuousClock.Instant
   }
@@ -42,7 +47,7 @@ struct SandLoop {
     guard let size = session.measure(), fits(size) else {
       scene.board = nil
       scene.previous = nil
-      scene.stroke = nil
+      scene.pen.stroke = nil
       if !scene.toldTooSmall {
         session.write("小さすぎる\n")
         scene.toldTooSmall = true
@@ -51,12 +56,12 @@ struct SandLoop {
     }
     scene.toldTooSmall = false
     var current = resized(scene.board, to: size)
-    scene.stroke = apply(events, to: &current, stroke: scene.stroke)
+    scene.pen = apply(events, to: &current, pen: scene.pen)
     if clock.now >= scene.nextTick {
       current.tick()
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
-    let frame = FramePainter.paint(current)
+    let frame = FramePainter.paint(current, brush: scene.pen.grain)
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
     scene.board = current
@@ -71,13 +76,13 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release:
+    case .press, .drag, .release, .material:
       return false
     }
   }
 
   private func resized(_ board: Board?, to size: (columns: Int, rows: Int)) -> Board {
-    let height = size.rows * 2
+    let height = (size.rows - 1) * 2
     guard let board else {
       return Board(width: size.columns, height: height)
     }
@@ -87,42 +92,57 @@ struct SandLoop {
     return Board(width: size.columns, height: height, keeping: board)
   }
 
-  private func apply(_ events: [TerminalEvent], to board: inout Board, stroke: Cursor?) -> Cursor? {
-    var last = stroke
+  private func apply(_ events: [TerminalEvent], to board: inout Board, pen: Pen) -> Pen {
+    var next = pen
     for event in events {
-      last = applyOne(event, to: &board, stroke: last)
+      next = applyOne(event, to: &board, pen: next)
     }
-    return last
+    return next
   }
 
-  private func applyOne(_ event: TerminalEvent, to board: inout Board, stroke: Cursor?) -> Cursor? {
+  private func applyOne(_ event: TerminalEvent, to board: inout Board, pen: Pen) -> Pen {
     switch event {
     case .quit:
-      return stroke
+      return pen
+    case .material(let key):
+      return Pen(grain: grain(for: key), stroke: nil)
     case .press(let cursor):
-      stampCell(cursor, on: &board)
-      return cursor
+      stampCell(cursor, grain: pen.grain, on: &board)
+      return Pen(grain: pen.grain, stroke: cursor)
     case .drag(let cursor):
-      let start = stroke ?? cursor
-      connect(from: start, to: cursor, on: &board)
-      return cursor
+      let start = pen.stroke ?? cursor
+      connect(from: start, to: cursor, grain: pen.grain, on: &board)
+      return Pen(grain: pen.grain, stroke: cursor)
     case .release:
-      return nil
+      return Pen(grain: pen.grain, stroke: nil)
     }
   }
 
-  private func connect(from start: Cursor, to end: Cursor, on board: inout Board) {
+  private func grain(for key: BrushKey) -> Grain {
+    switch key {
+    case .sand:
+      return .sand
+    case .water:
+      return .water
+    }
+  }
+
+  private func connect(from start: Cursor, to end: Cursor, grain: Grain, on board: inout Board) {
     let cells = Stroke.cells(
       from: Point(x: start.column, y: start.row),
       to: Point(x: end.column, y: end.row)
     )
     for cell in cells {
-      stampCell(Cursor(column: cell.x, row: cell.y), on: &board)
+      stampCell(Cursor(column: cell.x, row: cell.y), grain: grain, on: &board)
     }
   }
 
-  private func stampCell(_ cursor: Cursor, on board: inout Board) {
-    board.stamp(x: cursor.column, y: cursor.row * 2)
-    board.stamp(x: cursor.column, y: cursor.row * 2 + 1)
+  private func stampCell(_ cursor: Cursor, grain: Grain, on board: inout Board) {
+    let row = cursor.row - 1
+    guard row >= 0 else {
+      return
+    }
+    board.stamp(x: cursor.column, y: row * 2, grain: grain)
+    board.stamp(x: cursor.column, y: row * 2 + 1, grain: grain)
   }
 }

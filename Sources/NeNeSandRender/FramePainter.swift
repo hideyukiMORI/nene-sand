@@ -2,9 +2,37 @@ import NeNeSandCore
 
 public enum FramePainter {
   public static let sand = CellColor(red: 214, green: 176, blue: 92)
+  public static let water = CellColor(red: 64, green: 156, blue: 214)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
-  public static func paint(_ board: Board) -> Frame {
+  public static func paint(_ board: Board, brush: Grain) -> Frame {
+    var glyphs = label(brush, width: board.width)
+    glyphs.append(contentsOf: field(board))
+    let rows = (board.height + 1) / 2
+    return Frame(width: board.width, height: rows + 1, glyphs: glyphs)
+  }
+
+  private static func label(_ brush: Grain, width: Int) -> [Glyph] {
+    var glyphs: [Glyph] = []
+    var column = 0
+    while column < width {
+      glyphs.append(labelGlyph(brush, column: column))
+      column += 1
+    }
+    return glyphs
+  }
+
+  private static func labelGlyph(_ brush: Grain, column: Int) -> Glyph {
+    if column == 0 {
+      return Glyph(shape: .text(name(brush)), foreground: color(brush), background: emptyColor)
+    }
+    if column == 1 {
+      return Glyph(shape: .gap, foreground: emptyColor, background: emptyColor)
+    }
+    return blank()
+  }
+
+  private static func field(_ board: Board) -> [Glyph] {
     let rows = (board.height + 1) / 2
     var glyphs: [Glyph] = []
     var row = 0
@@ -16,14 +44,14 @@ public enum FramePainter {
       }
       row += 1
     }
-    return Frame(width: board.width, height: rows, glyphs: glyphs)
+    return glyphs
   }
 
   private static func glyph(_ board: Board, column: Int, row: Int) -> Glyph {
     let top = board.grain(x: column, y: row * 2)
     let bottom = board.grain(x: column, y: row * 2 + 1)
     if top == .empty && bottom == .empty {
-      return Glyph(shape: .blank, foreground: emptyColor, background: emptyColor)
+      return blank()
     }
     return Glyph(
       shape: .upperHalf,
@@ -32,12 +60,29 @@ public enum FramePainter {
     )
   }
 
+  private static func blank() -> Glyph {
+    Glyph(shape: .blank, foreground: emptyColor, background: emptyColor)
+  }
+
+  private static func name(_ grain: Grain) -> Character {
+    switch grain {
+    case .empty:
+      return " "
+    case .sand:
+      return "砂"
+    case .water:
+      return "水"
+    }
+  }
+
   private static func color(_ grain: Grain) -> CellColor {
     switch grain {
     case .empty:
       return emptyColor
     case .sand:
       return sand
+    case .water:
+      return water
     }
   }
 }

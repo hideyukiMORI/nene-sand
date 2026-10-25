@@ -10,6 +10,18 @@ struct AnsiDiffTests {
   }
 
   @Test
+  func textGlyphIsWritten() {
+    let mark = Glyph(
+      shape: .text("水"),
+      foreground: FramePainter.water,
+      background: FramePainter.emptyColor
+    )
+    let frame = Frame(width: 1, height: 1, glyphs: [mark])
+    let text = AnsiDiff.text(previous: nil, next: frame, trueColor: true)
+    #expect(text.contains("水"))
+  }
+
+  @Test
   func unchangedFrameIsEmpty() {
     let frame = Frame(width: 1, height: 1, glyphs: [blank])
     let text = AnsiDiff.text(previous: frame, next: frame, trueColor: false)
