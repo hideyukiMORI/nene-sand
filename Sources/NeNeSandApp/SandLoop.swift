@@ -19,6 +19,7 @@ struct SandLoop {
     var grain: Grain = .sand
     var stroke: Cursor?
     var automatic = false
+    var paused = false
     var hand = AutomaticStroke()
     var handAt: Cursor?
   }
@@ -60,7 +61,7 @@ struct SandLoop {
     scene.toldTooSmall = false
     var current = resized(scene.board, to: size)
     scene.pen = apply(events, to: &current, pen: scene.pen)
-    if clock.now >= scene.nextTick {
+    if !scene.pen.paused && clock.now >= scene.nextTick {
       if scene.pen.automatic {
         scene.pen = follow(scene.pen, on: &current)
       }
@@ -70,8 +71,11 @@ struct SandLoop {
     let frame = FramePainter.paint(
       current,
       brush: scene.pen.grain,
-      automatic: scene.pen.automatic,
-      stoneKnown: current.stoneKnown
+      marks: FramePainter.Marks(
+        automatic: scene.pen.automatic,
+        stoneKnown: current.stoneKnown,
+        paused: scene.pen.paused
+      )
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
@@ -87,7 +91,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic, .clear:
+    case .press, .drag, .release, .material, .automatic, .clear, .pause:
       return false
     }
   }
@@ -127,11 +131,16 @@ struct SandLoop {
       var next = moved(pen, grain: pen.grain, stroke: nil)
       next.handAt = nil
       return next
+    case .pause:
+      var next = pen
+      next.paused.toggle()
+      return next
     case .automatic:
       return Pen(
         grain: pen.grain,
         stroke: nil,
         automatic: !pen.automatic,
+        paused: pen.paused,
         hand: AutomaticStroke(),
         handAt: nil
       )
@@ -152,6 +161,7 @@ struct SandLoop {
       grain: grain,
       stroke: stroke,
       automatic: pen.automatic,
+      paused: pen.paused,
       hand: pen.hand,
       handAt: pen.handAt
     )

@@ -11,4 +11,5 @@ public enum TerminalEvent: Equatable, Sendable {
   case material(BrushKey)
   case automatic
   case clear
+  case pause
 }
