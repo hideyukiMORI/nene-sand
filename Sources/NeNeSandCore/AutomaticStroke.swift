@@ -15,6 +15,8 @@ public struct AutomaticStroke: Sendable {
     case .fire:
       return .wood
     case .wood:
+      return .lava
+    case .lava:
       return .sand
     case .empty:
       return .sand

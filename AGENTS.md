@@ -6,7 +6,7 @@ the normative documents live in [docs/](docs/).
 ## Project identity
 
 - Product: NeNe Sand — a mouse-drawn falling-sand simulator for the terminal, with incremental-game progression
-- Language / UI: Swift 6.4.1 / the terminal (ANSI). Sand, water, oil, fire, and wood can be drawn. Oil floats on water. Fire rises through air and expires. Wood stays where it is placed. Fire ignites orthogonal oil and wood, and water puts fire out. `a` toggles automatic drawing, alternating those materials on each stroke. Lava, progression, and save are not in this revision
+- Language / UI: Swift 6.4.1 / the terminal (ANSI). Sand, water, oil, fire, wood, and lava can be drawn. Oil floats on water. Fire rises through air and expires. Wood stays where it is placed. Fire and lava ignite orthogonal oil and wood, and water puts fire out. Lava flows on every other tick. `a` toggles automatic drawing, alternating those materials on each stroke. Stone, progression, and save are not in this revision
 - Package root: `nene-sand` (composition module `NeNeSandApp`)
 - Governing principle: **one meaning, one canonical implementation path, enforced by machines**
 
