@@ -5,7 +5,7 @@ import NeNeSandTerminal
 
 struct SandLoop {
   private static let minimumColumns = 8
-  private static let minimumRows = 4
+  private static let minimumRows = FramePainter.topRows + FramePainter.bottomRows + 1
   private static let step = Duration.milliseconds(16)
   private static let widestReach = 2
 
@@ -101,7 +101,7 @@ struct SandLoop {
   }
 
   private func resized(_ board: Board?, to size: (columns: Int, rows: Int)) -> Board {
-    let height = (size.rows - 1 - FramePainter.deckRows) * 2
+    let height = (size.rows - FramePainter.topRows - FramePainter.bottomRows) * 2
     guard let board else {
       return Board(width: size.columns, height: height)
     }
@@ -182,7 +182,7 @@ struct SandLoop {
       next.handAt = nil
       return next
     }
-    let cursor = Cursor(column: point.x, row: point.y + 1)
+    let cursor = Cursor(column: point.x, row: point.y + FramePainter.topRows)
     let dab = Dab(grain: next.grain, reach: next.reach)
     if let previous = next.handAt {
       connect(from: previous, to: cursor, dab: dab, on: &board)
@@ -289,7 +289,7 @@ struct SandLoop {
   }
 
   private func stampBrush(_ cursor: Cursor, dab: Dab, on board: inout Board) {
-    let fieldRow = cursor.row - 1
+    let fieldRow = cursor.row - FramePainter.topRows
     guard fieldRow >= 0 && fieldRow < board.height / 2 else {
       return
     }
@@ -300,7 +300,7 @@ struct SandLoop {
   }
 
   private func stampCell(_ cursor: Cursor, grain: Grain, on board: inout Board) {
-    let row = cursor.row - 1
+    let row = cursor.row - FramePainter.topRows
     guard row >= 0 else {
       return
     }
