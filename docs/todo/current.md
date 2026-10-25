@@ -49,6 +49,6 @@
 
 ## 次の 1 手
 
-遊び方は README。公開物は GitHub Release の `v0.1.0` で、Ubuntu 22.04 以降の x86_64 向け実行ファイルと `SHA256SUMS` である。
+遊び方は README。入れるのは `curl -fsSL https://raw.githubusercontent.com/hideyukiMORI/nene-sand/main/install.sh | bash`。公開物は GitHub Release の `v0.1.0` で、Ubuntu 22.04 以降の x86_64 向け実行ファイルと `SHA256SUMS` である。
 
 セーブは結線した。盤の粒は保存しない。自動描画の買い方は、あとで調整する。100 と +1 は初期値。蛇口以外の装置と湯気は、触れてから。

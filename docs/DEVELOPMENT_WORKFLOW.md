@@ -147,6 +147,8 @@ Waivers: none | WVR-NNNN
 
 製品の版は git タグ `v` と番号である。実行ファイルには版を埋め込まない。SwiftPM の実行ターゲットに版フィールドが無く、埋め込みの別経路は作らない。
 
+入れ方の正本は、`main` の `install.sh` である。最新の Release を取り、`SHA256SUMS` が合ってから `~/.local/bin` へ置く。合わなければ何も置かない。
+
 公開物は GitHub Release の次の 2 つだけである。
 
 - `nene-sand-linux-x86_64`。Ubuntu 22.04 以降の x86_64。`swift build -c release --static-swift-stdlib` の成果物を `strip` したもの
