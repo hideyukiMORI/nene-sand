@@ -7,36 +7,86 @@ public enum FramePainter {
   public static let fire = CellColor(red: 228, green: 88, blue: 32)
   public static let wood = CellColor(red: 112, green: 78, blue: 42)
   public static let lava = CellColor(red: 196, green: 48, blue: 24)
+  public static let stone = CellColor(red: 132, green: 136, blue: 144)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
-  public static func paint(_ board: Board, brush: Grain, automatic: Bool = false) -> Frame {
-    var glyphs = label(brush, width: board.width, automatic: automatic)
+  public static func paint(
+    _ board: Board,
+    brush: Grain,
+    automatic: Bool = false,
+    stoneKnown: Bool = false
+  ) -> Frame {
+    var glyphs = label(brush, width: board.width, automatic: automatic, stoneKnown: stoneKnown)
     glyphs.append(contentsOf: field(board))
     let rows = (board.height + 1) / 2
     return Frame(width: board.width, height: rows + 1, glyphs: glyphs)
   }
 
-  private static func label(_ brush: Grain, width: Int, automatic: Bool) -> [Glyph] {
+  private static func label(
+    _ brush: Grain,
+    width: Int,
+    automatic: Bool,
+    stoneKnown: Bool
+  ) -> [Glyph] {
     var glyphs: [Glyph] = []
     var column = 0
     while column < width {
-      glyphs.append(labelGlyph(brush, column: column, automatic: automatic))
+      glyphs.append(
+        labelGlyph(brush, column: column, automatic: automatic, stoneKnown: stoneKnown)
+      )
       column += 1
     }
     return glyphs
   }
 
-  private static func labelGlyph(_ brush: Grain, column: Int, automatic: Bool) -> Glyph {
+  private static func labelGlyph(
+    _ brush: Grain,
+    column: Int,
+    automatic: Bool,
+    stoneKnown: Bool
+  ) -> Glyph {
     if column == 0 {
       return Glyph(shape: .text(name(brush)), foreground: color(brush), background: emptyColor)
     }
-    if column == 1 || (automatic && column == 3) {
+    if isGap(column, automatic: automatic, stoneKnown: stoneKnown) {
       return Glyph(shape: .gap, foreground: emptyColor, background: emptyColor)
     }
+    if let mark = mark(column, brush: brush, automatic: automatic, stoneKnown: stoneKnown) {
+      return mark
+    }
+    return blank()
+  }
+
+  private static func isGap(_ column: Int, automatic: Bool, stoneKnown: Bool) -> Bool {
+    if column == 1 {
+      return true
+    }
+    if automatic && column == 3 {
+      return true
+    }
+    return stoneKnown && column == stoneColumn(automatic: automatic) + 1
+  }
+
+  private static func mark(
+    _ column: Int,
+    brush: Grain,
+    automatic: Bool,
+    stoneKnown: Bool
+  ) -> Glyph? {
     if automatic && column == 2 {
       return Glyph(shape: .text("自"), foreground: color(brush), background: emptyColor)
     }
-    return blank()
+    if stoneKnown && column == stoneColumn(automatic: automatic) {
+      return Glyph(shape: .text("石"), foreground: stone, background: emptyColor)
+    }
+    return nil
+  }
+
+  private static func stoneColumn(automatic: Bool) -> Int {
+    if automatic {
+      return 4
+    }
+    return 2
   }
 
   private static func field(_ board: Board) -> [Glyph] {
@@ -87,6 +137,8 @@ public enum FramePainter {
       return "木"
     case .lava:
       return "溶"
+    case .stone:
+      return "石"
     }
   }
 
@@ -106,6 +158,8 @@ public enum FramePainter {
       return wood
     case .lava:
       return lava
+    case .stone:
+      return stone
     }
   }
 }

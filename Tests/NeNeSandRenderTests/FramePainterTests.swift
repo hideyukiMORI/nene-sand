@@ -41,6 +41,36 @@ struct FramePainterTests {
   }
 
   @Test
+  func stoneMarkSitsBesideTheName() {
+    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .water, stoneKnown: true)
+    #expect(frame.glyphs[2].shape == .text("石"))
+    #expect(frame.glyphs[2].foreground == FramePainter.stone)
+    #expect(frame.glyphs[3].shape == .gap)
+  }
+
+  @Test
+  func stoneMarkFollowsTheAutomaticMark() {
+    let frame = FramePainter.paint(
+      Board(width: 6, height: 2),
+      brush: .water,
+      automatic: true,
+      stoneKnown: true
+    )
+    #expect(frame.glyphs[2].shape == .text("自"))
+    #expect(frame.glyphs[4].shape == .text("石"))
+    #expect(frame.glyphs[5].shape == .gap)
+  }
+
+  @Test
+  func stoneNamesTheBrush() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .stone)
+    let frame = FramePainter.paint(board, brush: .stone)
+    #expect(frame.glyphs[0].shape == .text("石"))
+    #expect(frame.glyphs[1].foreground == FramePainter.stone)
+  }
+
+  @Test
   func lavaNamesTheBrush() {
     var board = Board(width: 1, height: 2)
     board.stamp(x: 0, y: 0, grain: .lava)

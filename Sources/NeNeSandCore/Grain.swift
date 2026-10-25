@@ -6,6 +6,7 @@ public enum Grain: Equatable, Sendable {
   case fire
   case wood
   case lava
+  case stone
 
   func slides(bias: Int) -> [Slide] {
     switch self {
@@ -13,7 +14,7 @@ public enum Grain: Equatable, Sendable {
       return []
     case .wood:
       return WoodMotion.slides(bias: bias)
-    case .sand:
+    case .sand, .stone:
       return SandMotion.slides(bias: bias)
     case .water, .oil, .lava:
       return LiquidMotion.slides(bias: bias)
@@ -38,6 +39,8 @@ public enum Grain: Equatable, Sendable {
       return WoodMotion.enters(destination)
     case .lava:
       return LavaMotion.enters(destination)
+    case .stone:
+      return StoneMotion.enters(destination)
     }
   }
 
@@ -45,7 +48,7 @@ public enum Grain: Equatable, Sendable {
     switch self {
     case .water, .oil, .lava:
       return true
-    case .empty, .sand, .fire, .wood:
+    case .empty, .sand, .fire, .wood, .stone:
       return false
     }
   }

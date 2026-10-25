@@ -11,7 +11,7 @@ enum SandMotion {
     switch destination {
     case .empty, .water, .oil, .lava:
       return true
-    case .sand, .fire, .wood:
+    case .sand, .fire, .wood, .stone:
       return false
     }
   }

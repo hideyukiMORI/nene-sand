@@ -5,6 +5,7 @@ public struct Board {
   private var drift: [Int]
   private var age: [Int]
   private var step: Int
+  public private(set) var stoneKnown: Bool
 
   public init(width: Int, height: Int) {
     let safeWidth = max(width, 0)
@@ -16,6 +17,7 @@ public struct Board {
     self.drift = Array(repeating: 0, count: count)
     self.age = Array(repeating: 0, count: count)
     self.step = 0
+    self.stoneKnown = false
   }
 
   public init(width: Int, height: Int, keeping previous: Board) {
@@ -37,6 +39,7 @@ public struct Board {
       y += 1
     }
     step = previous.step
+    stoneKnown = previous.stoneKnown
   }
 
   public func grain(x: Int, y: Int) -> Grain {
@@ -80,8 +83,15 @@ public struct Board {
         cells[index] = product
         drift[index] = 0
         age[index] = 0
+        remember(product)
       }
       index += 1
+    }
+  }
+
+  private mutating func remember(_ product: Grain) {
+    if product == .stone {
+      stoneKnown = true
     }
   }
 
@@ -167,7 +177,7 @@ public struct Board {
     switch grain {
     case .lava:
       return LavaMotion.moves(on: step)
-    case .empty, .sand, .water, .oil, .fire, .wood:
+    case .empty, .sand, .water, .oil, .fire, .wood, .stone:
       return true
     }
   }
@@ -241,7 +251,7 @@ public struct Board {
         return .found(y)
       }
       return .skip
-    case .sand, .fire, .wood, .lava:
+    case .sand, .fire, .wood, .lava, .stone:
       if seenOil {
         return .blocked
       }
@@ -464,7 +474,7 @@ public struct Board {
 
   private func fallsIntoGaps(_ grain: Grain) -> Bool {
     switch grain {
-    case .sand, .water, .oil, .fire, .lava:
+    case .sand, .water, .oil, .fire, .lava, .stone:
       return true
     case .empty, .wood:
       return false
