@@ -87,7 +87,7 @@ struct FramePainterTests {
   @Test
   func wideHelpNamesTheThemeKey() {
     let frame = FramePainter.paint(Board(width: 100, height: 2), brush: .sand)
-    #expect(shown(frame, row: 6).contains("t theme"))
+    #expect(shown(frame, row: 6).contains("t phosphor"))
   }
 
   @Test
