@@ -19,6 +19,7 @@ public enum FramePainter {
     public let progress: Progression
     public let fireKnown: Bool
     public let earning: Bool
+    public let codex: Bool
 
     public init(
       automatic: Bool = false,
@@ -28,7 +29,8 @@ public enum FramePainter {
       theme: Theme = .phosphor,
       progress: Progression = .beginning,
       fireKnown: Bool = false,
-      earning: Bool = false
+      earning: Bool = false,
+      codex: Bool = false
     ) {
       self.automatic = automatic
       self.stone = stone
@@ -38,6 +40,7 @@ public enum FramePainter {
       self.progress = progress
       self.fireKnown = fireKnown
       self.earning = earning
+      self.codex = codex
     }
   }
 
@@ -51,6 +54,9 @@ public enum FramePainter {
 
   private static func field(_ board: Board, marks: Marks) -> [Glyph] {
     let rows = (board.height + 1) / 2
+    if marks.codex {
+      return Codex.glyphs(width: board.width, rows: rows, marks: marks)
+    }
     var glyphs: [Glyph] = []
     var row = 0
     while row < rows {
