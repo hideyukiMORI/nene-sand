@@ -1,10 +1,40 @@
 public struct Progression: Equatable, Sendable {
   public let purse: Purse
 
-  public static let beginning = Progression(purse: .zero, oil: false, wood: false, lava: false)
+  public static let beginning = Progression(
+    purse: .zero,
+    oil: false,
+    wood: false,
+    lava: false,
+    faucet: false
+  )
 
   public func holding(_ purse: Purse) -> Progression {
-    Progression(purse: purse, oil: oil, wood: wood, lava: lava)
+    Progression(purse: purse, oil: oil, wood: wood, lava: lava, faucet: faucet)
+  }
+
+  public func ownsFaucet() -> Bool {
+    faucet
+  }
+
+  public func faucetCost() -> Int? {
+    if faucet {
+      return nil
+    }
+    return Faucet.price
+  }
+
+  public func buyingFaucet() -> Progression {
+    if faucet || purse.amount < Faucet.price {
+      return self
+    }
+    return Progression(
+      purse: purse.paying(Faucet.price),
+      oil: oil,
+      wood: wood,
+      lava: lava,
+      faucet: true
+    )
   }
 
   public func owns(_ grain: Grain) -> Bool {
@@ -37,7 +67,8 @@ public struct Progression: Equatable, Sendable {
       purse: purse.paying(ask),
       oil: oil || grain == .oil,
       wood: wood || grain == .wood,
-      lava: lava || grain == .lava
+      lava: lava || grain == .lava,
+      faucet: faucet
     )
   }
 
@@ -61,4 +92,5 @@ public struct Progression: Equatable, Sendable {
   private let oil: Bool
   private let wood: Bool
   private let lava: Bool
+  private let faucet: Bool
 }

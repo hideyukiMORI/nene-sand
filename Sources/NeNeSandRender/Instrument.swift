@@ -158,7 +158,11 @@ public enum Instrument {
       return []
     }
     let ink = marks.theme.chrome
-    return [.text(" $ " + String(marks.progress.purse.amount), ink.accent, ink.ground)]
+    var line = " $ " + String(marks.progress.purse.amount)
+    if let ask = marks.progress.faucetCost() {
+      line += "  f " + String(ask)
+    }
+    return [.text(line, ink.accent, ink.ground)]
   }
 
   private static func aside(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {

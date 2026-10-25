@@ -93,6 +93,13 @@ public struct MouseParser {
     if byte == UInt8(ascii: "]") {
       return .brush(1)
     }
+    return faucetEvent(byte)
+  }
+
+  private func faucetEvent(_ byte: UInt8) -> TerminalEvent? {
+    if byte == UInt8(ascii: "f") || byte == UInt8(ascii: "F") {
+      return .faucet
+    }
     return nil
   }
 

@@ -191,8 +191,24 @@ struct FramePainterTests {
       )
     )
     #expect(shown(frame, row: 4).contains("$ 32"))
+    #expect(shown(frame, row: 4).contains("f 60"))
     let mouth = FramePainter.topRows * board.width + board.width / 2
     #expect(frame.glyphs[mouth].background == Theme.phosphor.accent())
+  }
+
+  @Test
+  func ownedFaucetHidesThePriceAndMarksTheSpout() {
+    let board = Board(width: 80, height: 2)
+    let bought = Progression.beginning.holding(Purse.zero.collecting(.lava).collecting(.lava))
+      .buyingFaucet()
+    let frame = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(progress: bought, earning: true)
+    )
+    #expect(!shown(frame, row: 4).contains("f 60"))
+    let spout = FramePainter.topRows * board.width + board.width / 2
+    #expect(frame.glyphs[spout].foreground == Theme.phosphor.accent())
   }
 
   @Test
