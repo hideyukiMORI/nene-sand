@@ -20,6 +20,7 @@ public enum FramePainter {
     public let fireKnown: Bool
     public let earning: Bool
     public let codex: Bool
+    public let confirming: Bool
 
     public init(
       automatic: Bool = false,
@@ -30,7 +31,8 @@ public enum FramePainter {
       progress: Progression = .beginning,
       fireKnown: Bool = false,
       earning: Bool = false,
-      codex: Bool = false
+      codex: Bool = false,
+      confirming: Bool = false
     ) {
       self.automatic = automatic
       self.stone = stone
@@ -41,6 +43,7 @@ public enum FramePainter {
       self.fireKnown = fireKnown
       self.earning = earning
       self.codex = codex
+      self.confirming = confirming
     }
   }
 

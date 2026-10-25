@@ -4,16 +4,25 @@ public struct Purse: Equatable, Sendable {
   public static let zero = Purse(amount: 0)
 
   public func collecting(_ grain: Grain) -> Purse {
-    Purse(amount: amount + Price.of(grain) * Self.rate)
+    Purse(amount: amount + Price.of(grain) * multiplier, multiplier: multiplier)
+  }
+
+  public func rate() -> Int {
+    multiplier
   }
 
   func paying(_ price: Int) -> Purse {
-    Purse(amount: amount - price)
+    Purse(amount: amount - price, multiplier: multiplier)
   }
 
-  private static let rate = 1
+  func quicker() -> Purse {
+    Purse(amount: amount, multiplier: multiplier + 1)
+  }
 
-  private init(amount: Int) {
+  private let multiplier: Int
+
+  private init(amount: Int, multiplier: Int = 1) {
     self.amount = amount
+    self.multiplier = multiplier
   }
 }
