@@ -60,11 +60,18 @@ public struct MouseParser {
     if byte == UInt8(ascii: "7") {
       return .material(.stone)
     }
+    return commandEvent(byte)
+  }
+
+  private func commandEvent(_ byte: UInt8) -> TerminalEvent? {
     if byte == UInt8(ascii: "a") || byte == UInt8(ascii: "A") {
       return .automatic
     }
     if byte == UInt8(ascii: "c") || byte == UInt8(ascii: "C") {
       return .clear
+    }
+    if byte == UInt8(ascii: " ") {
+      return .pause
     }
     return nil
   }

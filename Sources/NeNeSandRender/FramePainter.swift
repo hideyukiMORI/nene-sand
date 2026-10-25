@@ -10,83 +10,94 @@ public enum FramePainter {
   public static let stone = CellColor(red: 132, green: 136, blue: 144)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
-  public static func paint(
-    _ board: Board,
-    brush: Grain,
-    automatic: Bool = false,
-    stoneKnown: Bool = false
-  ) -> Frame {
-    var glyphs = label(brush, width: board.width, automatic: automatic, stoneKnown: stoneKnown)
+  public struct Marks: Equatable, Sendable {
+    public let automatic: Bool
+    public let stoneKnown: Bool
+    public let paused: Bool
+
+    public init(automatic: Bool = false, stoneKnown: Bool = false, paused: Bool = false) {
+      self.automatic = automatic
+      self.stoneKnown = stoneKnown
+      self.paused = paused
+    }
+  }
+
+  public static func paint(_ board: Board, brush: Grain, marks: Marks = Marks()) -> Frame {
+    var glyphs = label(brush, width: board.width, marks: marks)
     glyphs.append(contentsOf: field(board))
     let rows = (board.height + 1) / 2
     return Frame(width: board.width, height: rows + 1, glyphs: glyphs)
   }
 
-  private static func label(
-    _ brush: Grain,
-    width: Int,
-    automatic: Bool,
-    stoneKnown: Bool
-  ) -> [Glyph] {
+  private static func label(_ brush: Grain, width: Int, marks: Marks) -> [Glyph] {
+    let shown = texts(marks)
     var glyphs: [Glyph] = []
     var column = 0
     while column < width {
-      glyphs.append(
-        labelGlyph(brush, column: column, automatic: automatic, stoneKnown: stoneKnown)
-      )
+      glyphs.append(labelGlyph(brush, column: column, shown: shown))
       column += 1
     }
     return glyphs
   }
 
-  private static func labelGlyph(
-    _ brush: Grain,
-    column: Int,
-    automatic: Bool,
-    stoneKnown: Bool
-  ) -> Glyph {
+  private static func texts(_ marks: Marks) -> [Character] {
+    var shown: [Character] = []
+    if marks.automatic {
+      shown.append("自")
+    }
+    if marks.stoneKnown {
+      shown.append("石")
+    }
+    if marks.paused {
+      shown.append("停")
+    }
+    return shown
+  }
+
+  private static func labelGlyph(_ brush: Grain, column: Int, shown: [Character]) -> Glyph {
     if column == 0 {
       return Glyph(shape: .text(name(brush)), foreground: color(brush), background: emptyColor)
     }
-    if isGap(column, automatic: automatic, stoneKnown: stoneKnown) {
-      return Glyph(shape: .gap, foreground: emptyColor, background: emptyColor)
-    }
-    if let mark = mark(column, brush: brush, automatic: automatic, stoneKnown: stoneKnown) {
+    if let mark = placed(shown, column: column, brush: brush) {
       return mark
+    }
+    if column == 1 || isSpacer(column, count: shown.count) {
+      return Glyph(shape: .gap, foreground: emptyColor, background: emptyColor)
     }
     return blank()
   }
 
-  private static func isGap(_ column: Int, automatic: Bool, stoneKnown: Bool) -> Bool {
-    if column == 1 {
-      return true
-    }
-    if automatic && column == 3 {
-      return true
-    }
-    return stoneKnown && column == stoneColumn(automatic: automatic) + 1
-  }
-
-  private static func mark(
-    _ column: Int,
-    brush: Grain,
-    automatic: Bool,
-    stoneKnown: Bool
-  ) -> Glyph? {
-    if automatic && column == 2 {
-      return Glyph(shape: .text("自"), foreground: color(brush), background: emptyColor)
-    }
-    if stoneKnown && column == stoneColumn(automatic: automatic) {
-      return Glyph(shape: .text("石"), foreground: stone, background: emptyColor)
+  private static func placed(_ shown: [Character], column: Int, brush: Grain) -> Glyph? {
+    var index = 0
+    while index < shown.count {
+      if column == 2 + index * 2 {
+        let text = shown[index]
+        return Glyph(
+          shape: .text(text),
+          foreground: markColor(text, brush: brush),
+          background: emptyColor
+        )
+      }
+      index += 1
     }
     return nil
   }
 
-  private static func stoneColumn(automatic: Bool) -> Int {
-    if automatic {
-      return 4
+  private static func markColor(_ text: Character, brush: Grain) -> CellColor {
+    if text == "石" {
+      return stone
     }
-    return 2
+    return color(brush)
+  }
+
+  private static func isSpacer(_ column: Int, count: Int) -> Bool {
+    if column < 3 || count == 0 {
+      return false
+    }
+    if column % 2 == 0 {
+      return false
+    }
+    return column <= count * 2 + 1
   }
 
   private static func field(_ board: Board) -> [Glyph] {

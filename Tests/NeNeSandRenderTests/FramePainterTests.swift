@@ -26,7 +26,11 @@ struct FramePainterTests {
 
   @Test
   func automaticMarkSitsBesideTheName() {
-    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .water, automatic: true)
+    let frame = FramePainter.paint(
+      Board(width: 4, height: 2),
+      brush: .water,
+      marks: FramePainter.Marks(automatic: true)
+    )
     #expect(frame.glyphs[0].shape == .text("水"))
     #expect(frame.glyphs[1].shape == .gap)
     #expect(frame.glyphs[2].shape == .text("自"))
@@ -42,7 +46,11 @@ struct FramePainterTests {
 
   @Test
   func stoneMarkSitsBesideTheName() {
-    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .water, stoneKnown: true)
+    let frame = FramePainter.paint(
+      Board(width: 4, height: 2),
+      brush: .water,
+      marks: FramePainter.Marks(stoneKnown: true)
+    )
     #expect(frame.glyphs[2].shape == .text("石"))
     #expect(frame.glyphs[2].foreground == FramePainter.stone)
     #expect(frame.glyphs[3].shape == .gap)
@@ -53,12 +61,25 @@ struct FramePainterTests {
     let frame = FramePainter.paint(
       Board(width: 6, height: 2),
       brush: .water,
-      automatic: true,
-      stoneKnown: true
+      marks: FramePainter.Marks(automatic: true, stoneKnown: true)
     )
     #expect(frame.glyphs[2].shape == .text("自"))
     #expect(frame.glyphs[4].shape == .text("石"))
     #expect(frame.glyphs[5].shape == .gap)
+  }
+
+  @Test
+  func pauseMarkFollowsTheOtherMarks() {
+    let frame = FramePainter.paint(
+      Board(width: 8, height: 2),
+      brush: .water,
+      marks: FramePainter.Marks(automatic: true, stoneKnown: true, paused: true)
+    )
+    #expect(frame.glyphs[2].shape == .text("自"))
+    #expect(frame.glyphs[4].shape == .text("石"))
+    #expect(frame.glyphs[6].shape == .text("停"))
+    #expect(frame.glyphs[6].foreground == FramePainter.water)
+    #expect(frame.glyphs[7].shape == .gap)
   }
 
   @Test

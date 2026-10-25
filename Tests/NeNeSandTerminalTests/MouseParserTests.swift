@@ -29,6 +29,12 @@ struct MouseParserTests {
   }
 
   @Test
+  func spacePauses() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: " ")]) == [.pause])
+  }
+
+  @Test
   func cClearsTheBoard() {
     var parser = MouseParser()
     #expect(parser.feed([UInt8(ascii: "c")]) == [.clear])
