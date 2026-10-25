@@ -158,6 +158,82 @@ struct BoardTests {
   }
 
   @Test
+  func fireWobblesUpLeftOnEvenTick() {
+    var board = Board(width: 3, height: 4)
+    board.stamp(x: 1, y: 3, grain: .fire)
+    board.tick()
+    #expect(board.grain(x: 0, y: 2) == .fire)
+    #expect(board.grain(x: 1, y: 3) == .empty)
+  }
+
+  @Test
+  func fireWobblesUpRightOnOddTick() {
+    var board = Board(width: 3, height: 4)
+    board.tick()
+    board.stamp(x: 1, y: 3, grain: .fire)
+    board.tick()
+    #expect(board.grain(x: 2, y: 2) == .fire)
+  }
+
+  @Test
+  func fireRisesOneCellInANarrowShaft() {
+    var board = Board(width: 1, height: 3)
+    board.stamp(x: 0, y: 2, grain: .fire)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .fire)
+    #expect(board.grain(x: 0, y: 0) == .empty)
+  }
+
+  @Test
+  func fireDoesNotEnterSand() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .fire)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .sand)
+    #expect(board.grain(x: 0, y: 1) == .fire)
+  }
+
+  @Test
+  func fireExpiresAndSandFalls() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .fire)
+    var tickCount = 0
+    while tickCount < 47 {
+      board.tick()
+      tickCount += 1
+    }
+    #expect(board.grain(x: 0, y: 1) == .fire)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .empty)
+    #expect(board.grain(x: 0, y: 0) == .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .sand)
+    #expect(board.count(of: .fire) == 0)
+    #expect(board.count(of: .sand) == 1)
+  }
+
+  @Test
+  func resizeKeepsFireAge() {
+    var board = Board(width: 1, height: 1)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    var tickCount = 0
+    while tickCount < 10 {
+      board.tick()
+      tickCount += 1
+    }
+    var grown = Board(width: 2, height: 1, keeping: board)
+    while tickCount < 47 {
+      grown.tick()
+      tickCount += 1
+    }
+    #expect(grown.grain(x: 0, y: 0) == .fire)
+    grown.tick()
+    #expect(grown.grain(x: 0, y: 0) == .empty)
+  }
+
+  @Test
   func oilFallsOneCell() {
     var board = Board(width: 1, height: 3)
     board.stamp(x: 0, y: 0, grain: .oil)
