@@ -17,4 +17,12 @@ enum WaterMotion {
       return false
     }
   }
+
+  static func canLevel(from surface: Int, toward neighbor: Int) -> Bool {
+    neighbor > surface
+  }
+
+  static func keepsCourse(drift: Int, dx: Int) -> Bool {
+    drift == 0 || drift == dx
+  }
 }

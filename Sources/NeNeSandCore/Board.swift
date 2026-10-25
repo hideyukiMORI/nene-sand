@@ -2,6 +2,7 @@ public struct Board {
   public let width: Int
   public let height: Int
   private var cells: [Grain]
+  private var drift: [Int]
   private var step: Int
 
   public init(width: Int, height: Int) {
@@ -9,7 +10,9 @@ public struct Board {
     let safeHeight = max(height, 0)
     self.width = safeWidth
     self.height = safeHeight
-    self.cells = Array(repeating: .empty, count: safeWidth * safeHeight)
+    let count = safeWidth * safeHeight
+    self.cells = Array(repeating: .empty, count: count)
+    self.drift = Array(repeating: 0, count: count)
     self.step = 0
   }
 
@@ -24,6 +27,7 @@ public struct Board {
         let kept = previous.grain(x: x, y: y)
         if kept != .empty {
           stamp(x: x, y: y, grain: kept)
+          copyDrift(from: previous, x: x, y: y)
         }
         x += 1
       }
@@ -44,6 +48,7 @@ public struct Board {
       return
     }
     cells[offset] = grain
+    drift[offset] = 0
   }
 
   public mutating func tick() {
@@ -86,10 +91,41 @@ public struct Board {
     }
     let grain = cells[from]
     for slide in grain.slides(bias: bias) {
+      if grain == .water && !waterMaySlide(slide, x: x, y: y, from: from) {
+        continue
+      }
       if shift(from: from, grain: grain, slide: slide, settled: &settled) {
         return
       }
     }
+  }
+
+  private func waterMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+    if slide.dy != 0 {
+      return true
+    }
+    if y > 0 && grain(x: x, y: y - 1) != .empty {
+      return false
+    }
+    let toward = surface(x + slide.dx)
+    if !WaterMotion.canLevel(from: surface(x), toward: toward) {
+      return false
+    }
+    return WaterMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+  }
+
+  private func surface(_ x: Int) -> Int {
+    guard x >= 0, x < width else {
+      return -1
+    }
+    var y = 0
+    while y < height {
+      if grain(x: x, y: y) != .empty {
+        return y
+      }
+      y += 1
+    }
+    return height
   }
 
   private mutating func shift(
@@ -104,10 +140,29 @@ public struct Board {
     guard grain.enters(destination) else {
       return false
     }
+    let incoming = drift[from]
+    let outgoing = drift[to]
     cells[from] = destination
     cells[to] = grain
+    drift[from] = outgoing
+    drift[to] = incoming
+    settleDrift(grain, slide: slide, to: to)
     settled[to] = true
     return true
+  }
+
+  private mutating func settleDrift(_ grain: Grain, slide: Slide, to: Int) {
+    if grain != .water {
+      return
+    }
+    drift[to] = slide.dy == 0 ? slide.dx : 0
+  }
+
+  private mutating func copyDrift(from previous: Board, x: Int, y: Int) {
+    guard let source = previous.offset(x: x, y: y), let dest = offset(x: x, y: y) else {
+      return
+    }
+    drift[dest] = previous.drift[source]
   }
 
   private struct Gap {
@@ -235,16 +290,25 @@ public struct Board {
     var y = stackBottom
     while y >= stackTop {
       let moving = grain(x: x, y: y)
-      place(x: x, y: y + length, grain: moving)
-      place(x: x, y: y, grain: .empty)
+      let carried = driftAt(x: x, y: y)
+      place(x: x, y: y + length, grain: moving, drift: carried)
+      place(x: x, y: y, grain: .empty, drift: 0)
       y -= 1
     }
   }
 
-  private mutating func place(x: Int, y: Int, grain: Grain) {
+  private func driftAt(x: Int, y: Int) -> Int {
+    guard let index = offset(x: x, y: y) else {
+      return 0
+    }
+    return drift[index]
+  }
+
+  private mutating func place(x: Int, y: Int, grain: Grain, drift: Int) {
     guard let index = offset(x: x, y: y) else {
       return
     }
     cells[index] = grain
+    self.drift[index] = drift
   }
 }

@@ -158,6 +158,70 @@ struct BoardTests {
   }
 
   @Test
+  func flatWaterStaysStill() {
+    var board = Board(width: 6, height: 3)
+    var x = 0
+    while x < 6 {
+      board.stamp(x: x, y: 1, grain: .water)
+      board.stamp(x: x, y: 2, grain: .sand)
+      x += 1
+    }
+    board.tick()
+    board.tick()
+    x = 0
+    while x < 6 {
+      #expect(board.grain(x: x, y: 1) == .water)
+      #expect(board.grain(x: x, y: 0) == .empty)
+      x += 1
+    }
+  }
+
+  @Test
+  func waterMoundLevelsAndRests() {
+    var board = Board(width: 9, height: 8)
+    var x = 0
+    while x < 9 {
+      board.stamp(x: x, y: 7, grain: .sand)
+      x += 1
+    }
+    var y = 4
+    while y <= 6 {
+      let reach = y - 4
+      x = 4 - reach
+      while x <= 4 + reach {
+        board.stamp(x: x, y: y, grain: .water)
+        x += 1
+      }
+      y += 1
+    }
+    let water = board.count(of: .water)
+    var tickCount = 0
+    while tickCount < 40 {
+      board.tick()
+      tickCount += 1
+    }
+    let rested = grains(board)
+    board.tick()
+    #expect(grains(board) == rested)
+    #expect(board.grain(x: 4, y: 4) == .empty)
+    #expect(board.count(of: .water) == water)
+  }
+
+  private func grains(_ board: Board) -> [Grain] {
+    var copied: [Grain] = []
+    var y = 0
+    while y < board.height {
+      var x = 0
+      while x < board.width {
+        copied.append(board.grain(x: x, y: y))
+        x += 1
+      }
+      y += 1
+    }
+    return copied
+  }
+
+  @Test
   func buriedWaterGapCloses() {
     var board = Board(width: 1, height: 4)
     board.stamp(x: 0, y: 0, grain: .water)
