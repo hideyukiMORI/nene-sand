@@ -210,13 +210,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 120, green: 200, blue: 255),
       free: CellColor(red: 255, green: 140, blue: 210),
       select: CellColor(red: 28, green: 16, blue: 36),
-      sand: CellColor(red: 220, green: 170, blue: 110),
-      water: CellColor(red: 80, green: 140, blue: 220),
-      oil: CellColor(red: 160, green: 110, blue: 50),
-      fire: CellColor(red: 240, green: 90, blue: 40),
-      wood: CellColor(red: 120, green: 80, blue: 50),
-      lava: CellColor(red: 200, green: 50, blue: 40),
-      stone: CellColor(red: 140, green: 132, blue: 150)
+      sand: CellColor(red: 236, green: 130, blue: 188),
+      water: CellColor(red: 90, green: 80, blue: 240),
+      oil: CellColor(red: 140, green: 60, blue: 110),
+      fire: CellColor(red: 255, green: 70, blue: 160),
+      wood: CellColor(red: 110, green: 50, blue: 90),
+      lava: CellColor(red: 220, green: 40, blue: 80),
+      stone: CellColor(red: 160, green: 90, blue: 200)
     )
   }
 
@@ -234,13 +234,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 180, green: 255, blue: 230),
       free: CellColor(red: 170, green: 160, blue: 255),
       select: CellColor(red: 12, green: 28, blue: 36),
-      sand: CellColor(red: 210, green: 180, blue: 110),
-      water: CellColor(red: 40, green: 150, blue: 220),
-      oil: CellColor(red: 150, green: 120, blue: 40),
-      fire: CellColor(red: 230, green: 100, blue: 40),
-      wood: CellColor(red: 100, green: 80, blue: 50),
-      lava: CellColor(red: 190, green: 60, blue: 36),
-      stone: CellColor(red: 140, green: 156, blue: 164)
+      sand: CellColor(red: 200, green: 214, blue: 150),
+      water: CellColor(red: 40, green: 170, blue: 240),
+      oil: CellColor(red: 120, green: 150, blue: 60),
+      fire: CellColor(red: 255, green: 176, blue: 90),
+      wood: CellColor(red: 60, green: 90, blue: 120),
+      lava: CellColor(red: 210, green: 60, blue: 40),
+      stone: CellColor(red: 140, green: 180, blue: 200)
     )
   }
 
@@ -258,13 +258,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 120, green: 190, blue: 255),
       free: CellColor(red: 220, green: 140, blue: 255),
       select: CellColor(red: 36, green: 12, blue: 16),
-      sand: CellColor(red: 220, green: 160, blue: 90),
-      water: CellColor(red: 60, green: 130, blue: 210),
-      oil: CellColor(red: 160, green: 90, blue: 40),
-      fire: CellColor(red: 255, green: 70, blue: 30),
-      wood: CellColor(red: 120, green: 64, blue: 48),
-      lava: CellColor(red: 190, green: 30, blue: 30),
-      stone: CellColor(red: 150, green: 130, blue: 130)
+      sand: CellColor(red: 240, green: 80, blue: 70),
+      water: CellColor(red: 70, green: 90, blue: 220),
+      oil: CellColor(red: 150, green: 30, blue: 40),
+      fire: CellColor(red: 255, green: 50, blue: 40),
+      wood: CellColor(red: 100, green: 28, blue: 36),
+      lava: CellColor(red: 200, green: 16, blue: 24),
+      stone: CellColor(red: 160, green: 80, blue: 90)
     )
   }
 
@@ -282,13 +282,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 80, green: 210, blue: 255),
       free: CellColor(red: 200, green: 140, blue: 255),
       select: CellColor(red: 20, green: 28, blue: 10),
-      sand: CellColor(red: 210, green: 180, blue: 70),
-      water: CellColor(red: 50, green: 140, blue: 210),
-      oil: CellColor(red: 150, green: 120, blue: 30),
-      fire: CellColor(red: 240, green: 110, blue: 30),
-      wood: CellColor(red: 110, green: 90, blue: 40),
-      lava: CellColor(red: 200, green: 60, blue: 30),
-      stone: CellColor(red: 140, green: 148, blue: 120)
+      sand: CellColor(red: 190, green: 230, blue: 50),
+      water: CellColor(red: 30, green: 120, blue: 210),
+      oil: CellColor(red: 110, green: 150, blue: 20),
+      fire: CellColor(red: 220, green: 255, blue: 40),
+      wood: CellColor(red: 60, green: 90, blue: 30),
+      lava: CellColor(red: 170, green: 50, blue: 20),
+      stone: CellColor(red: 120, green: 150, blue: 70)
     )
   }
 
@@ -306,13 +306,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 80, green: 230, blue: 220),
       free: CellColor(red: 190, green: 140, blue: 255),
       select: CellColor(red: 12, green: 18, blue: 40),
-      sand: CellColor(red: 214, green: 176, blue: 100),
-      water: CellColor(red: 70, green: 160, blue: 230),
-      oil: CellColor(red: 160, green: 120, blue: 40),
-      fire: CellColor(red: 235, green: 90, blue: 36),
-      wood: CellColor(red: 110, green: 80, blue: 48),
-      lava: CellColor(red: 200, green: 48, blue: 32),
-      stone: CellColor(red: 130, green: 140, blue: 160)
+      sand: CellColor(red: 240, green: 160, blue: 40),
+      water: CellColor(red: 40, green: 110, blue: 255),
+      oil: CellColor(red: 40, green: 70, blue: 140),
+      fire: CellColor(red: 255, green: 90, blue: 50),
+      wood: CellColor(red: 50, green: 60, blue: 110),
+      lava: CellColor(red: 200, green: 40, blue: 50),
+      stone: CellColor(red: 80, green: 100, blue: 190)
     )
   }
 
@@ -330,13 +330,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 100, green: 180, blue: 220),
       free: CellColor(red: 220, green: 130, blue: 160),
       select: CellColor(red: 36, green: 18, blue: 12),
-      sand: CellColor(red: 224, green: 170, blue: 80),
-      water: CellColor(red: 56, green: 132, blue: 200),
-      oil: CellColor(red: 140, green: 80, blue: 28),
-      fire: CellColor(red: 255, green: 80, blue: 28),
-      wood: CellColor(red: 130, green: 70, blue: 40),
-      lava: CellColor(red: 180, green: 36, blue: 24),
-      stone: CellColor(red: 150, green: 132, blue: 118)
+      sand: CellColor(red: 220, green: 100, blue: 40),
+      water: CellColor(red: 40, green: 100, blue: 190),
+      oil: CellColor(red: 140, green: 60, blue: 16),
+      fire: CellColor(red: 255, green: 70, blue: 16),
+      wood: CellColor(red: 80, green: 40, blue: 28),
+      lava: CellColor(red: 180, green: 30, blue: 12),
+      stone: CellColor(red: 150, green: 80, blue: 60)
     )
   }
 
@@ -354,13 +354,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 120, green: 200, blue: 255),
       free: CellColor(red: 200, green: 140, blue: 255),
       select: CellColor(red: 36, green: 14, blue: 28),
-      sand: CellColor(red: 220, green: 170, blue: 100),
-      water: CellColor(red: 70, green: 140, blue: 220),
-      oil: CellColor(red: 160, green: 100, blue: 48),
-      fire: CellColor(red: 240, green: 90, blue: 40),
-      wood: CellColor(red: 120, green: 72, blue: 56),
-      lava: CellColor(red: 200, green: 48, blue: 40),
-      stone: CellColor(red: 150, green: 136, blue: 144)
+      sand: CellColor(red: 240, green: 120, blue: 170),
+      water: CellColor(red: 80, green: 100, blue: 230),
+      oil: CellColor(red: 160, green: 50, blue: 100),
+      fire: CellColor(red: 255, green: 70, blue: 130),
+      wood: CellColor(red: 120, green: 40, blue: 80),
+      lava: CellColor(red: 210, green: 30, blue: 70),
+      stone: CellColor(red: 180, green: 100, blue: 160)
     )
   }
 
@@ -378,13 +378,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 100, green: 180, blue: 220),
       free: CellColor(red: 180, green: 150, blue: 210),
       select: CellColor(red: 24, green: 28, blue: 32),
-      sand: CellColor(red: 200, green: 170, blue: 100),
-      water: CellColor(red: 60, green: 140, blue: 200),
-      oil: CellColor(red: 150, green: 110, blue: 40),
-      fire: CellColor(red: 220, green: 90, blue: 40),
-      wood: CellColor(red: 110, green: 80, blue: 50),
-      lava: CellColor(red: 180, green: 50, blue: 36),
-      stone: CellColor(red: 128, green: 132, blue: 138)
+      sand: CellColor(red: 168, green: 150, blue: 130),
+      water: CellColor(red: 90, green: 120, blue: 160),
+      oil: CellColor(red: 90, green: 85, blue: 70),
+      fire: CellColor(red: 210, green: 100, blue: 60),
+      wood: CellColor(red: 70, green: 68, blue: 64),
+      lava: CellColor(red: 160, green: 55, blue: 45),
+      stone: CellColor(red: 70, green: 80, blue: 100)
     )
   }
 
@@ -402,13 +402,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 90, green: 190, blue: 230),
       free: CellColor(red: 210, green: 150, blue: 220),
       select: CellColor(red: 36, green: 28, blue: 10),
-      sand: CellColor(red: 230, green: 190, blue: 70),
-      water: CellColor(red: 50, green: 136, blue: 206),
-      oil: CellColor(red: 170, green: 120, blue: 30),
-      fire: CellColor(red: 245, green: 100, blue: 28),
-      wood: CellColor(red: 130, green: 90, blue: 36),
-      lava: CellColor(red: 200, green: 50, blue: 28),
-      stone: CellColor(red: 160, green: 148, blue: 120)
+      sand: CellColor(red: 245, green: 210, blue: 40),
+      water: CellColor(red: 40, green: 130, blue: 210),
+      oil: CellColor(red: 180, green: 140, blue: 20),
+      fire: CellColor(red: 255, green: 160, blue: 20),
+      wood: CellColor(red: 120, green: 70, blue: 20),
+      lava: CellColor(red: 210, green: 60, blue: 16),
+      stone: CellColor(red: 170, green: 140, blue: 60)
     )
   }
 
@@ -426,13 +426,13 @@ public enum Theme: Equatable, Sendable {
       auto: CellColor(red: 90, green: 180, blue: 255),
       free: CellColor(red: 190, green: 140, blue: 255),
       select: CellColor(red: 16, green: 16, blue: 20),
-      sand: CellColor(red: 208, green: 172, blue: 96),
-      water: CellColor(red: 64, green: 148, blue: 214),
-      oil: CellColor(red: 160, green: 116, blue: 40),
-      fire: CellColor(red: 228, green: 88, blue: 36),
-      wood: CellColor(red: 112, green: 80, blue: 48),
-      lava: CellColor(red: 196, green: 52, blue: 32),
-      stone: CellColor(red: 120, green: 122, blue: 128)
+      sand: CellColor(red: 150, green: 110, blue: 70),
+      water: CellColor(red: 40, green: 80, blue: 140),
+      oil: CellColor(red: 90, green: 60, blue: 30),
+      fire: CellColor(red: 200, green: 70, blue: 40),
+      wood: CellColor(red: 60, green: 40, blue: 36),
+      lava: CellColor(red: 130, green: 28, blue: 20),
+      stone: CellColor(red: 50, green: 52, blue: 60)
     )
   }
 }

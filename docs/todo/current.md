@@ -37,7 +37,7 @@
 | 自由に遊ぶ | 残す。全部解放で、通貨は無い。プレイ中の `m` で進行モードと切り替える |
 | 図鑑 | キーは `k`。画面はまだ無い |
 | 計器 | 盤の上に 3 行、下に 3 行。英語。色見本、筆の目盛、灯、状況、冗談、キー。76 桁未満は題字なし。左上の日本語の印は無い |
-| テーマ | `t` で 12。phosphor、amber、plasma、arctic、crimson、toxic、cobalt、rust、orchid、slate、nectar、void。水は青のまま。プレイ中だけ持つ |
+| テーマ | `t` で 12。phosphor、amber、plasma、arctic、crimson、toxic、cobalt、rust、orchid、slate、nectar、void。水は青のまま。緑と琥珀の粒は今のまま。ほかの粒はテーマの色が強い。プレイ中だけ持つ |
 | 装置 | 最初は蛇口だけ。ほかの種類と値段と倍率は、触れてから |
 
 物質と反応は、決まっているものに足してよい。
