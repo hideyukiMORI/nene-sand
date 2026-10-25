@@ -173,7 +173,7 @@ public enum Instrument {
 
   private static func help(_ width: Int, theme: Theme) -> [Glyph] {
     let ink = theme.chrome
-    let pairs = width >= namedWidth ? allKeys() : modeKeys()
+    let pairs = width >= namedWidth ? allKeys(theme) : modeKeys(theme)
     return compose(
       [.text(" ", ink.ground, ink.ground)] + keyParts(pairs, theme: theme)
         + [.fill(" ", ink.frameBright)],
@@ -411,12 +411,12 @@ public enum Instrument {
     [("left", "draw"), ("right", "erase"), ("c", "clear"), ("q", "quit")]
   }
 
-  private static func modeKeys() -> [(String, String)] {
-    [("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", "theme")]
+  private static func modeKeys(_ theme: Theme) -> [(String, String)] {
+    [("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", theme.name())]
   }
 
-  private static func allKeys() -> [(String, String)] {
-    mouseKeys() + modeKeys()
+  private static func allKeys(_ theme: Theme) -> [(String, String)] {
+    mouseKeys() + modeKeys(theme)
   }
 
   private static func keyParts(_ pairs: [(String, String)], theme: Theme) -> [Part] {
