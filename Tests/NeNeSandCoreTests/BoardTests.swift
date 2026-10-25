@@ -67,6 +67,97 @@ struct BoardTests {
   }
 
   @Test
+  func waterFallsOneCell() {
+    var board = Board(width: 1, height: 3)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .water)
+    #expect(board.grain(x: 0, y: 0) == .empty)
+  }
+
+  @Test
+  func waterMovesOncePerTick() {
+    var board = Board(width: 1, height: 4)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 0, y: 1, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .empty)
+    #expect(board.grain(x: 0, y: 1) == .water)
+    #expect(board.grain(x: 0, y: 2) == .water)
+    #expect(board.count(of: .water) == 2)
+  }
+
+  @Test
+  func waterSlidesDiagonally() {
+    var board = Board(width: 3, height: 2)
+    board.stamp(x: 1, y: 0, grain: .water)
+    board.stamp(x: 1, y: 1, grain: .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .water)
+    #expect(board.grain(x: 1, y: 0) == .empty)
+  }
+
+  @Test
+  func waterFlowsLeftOnEvenTick() {
+    var board = Board(width: 3, height: 2)
+    board.stamp(x: 1, y: 1, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .water)
+    #expect(board.grain(x: 1, y: 1) == .empty)
+  }
+
+  @Test
+  func waterFlowsRightOnOddTick() {
+    var board = Board(width: 3, height: 2)
+    board.tick()
+    board.stamp(x: 1, y: 1, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 2, y: 1) == .water)
+  }
+
+  @Test
+  func waterRestsOnSand() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 0, y: 1, grain: .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 0, y: 1) == .sand)
+  }
+
+  @Test
+  func sandSinksThroughWater() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 0, y: 1) == .sand)
+  }
+
+  @Test
+  func sandAndWaterKeepTheirCounts() {
+    var board = Board(width: 5, height: 6)
+    board.stamp(x: 2, y: 0, grain: .sand)
+    board.stamp(x: 2, y: 1, grain: .water)
+    board.stamp(x: 1, y: 5, grain: .water)
+    for _ in 0..<12 {
+      board.tick()
+    }
+    #expect(board.count(of: .sand) == 1)
+    #expect(board.count(of: .water) == 2)
+  }
+
+  @Test
+  func resizeKeepsWater() {
+    var board = Board(width: 2, height: 2)
+    board.stamp(x: 0, y: 0, grain: .water)
+    let grown = Board(width: 3, height: 2, keeping: board)
+    #expect(grown.grain(x: 0, y: 0) == .water)
+    #expect(grown.count(of: .water) == 1)
+  }
+
+  @Test
   func resizeKeepsOverlap() {
     var board = Board(width: 2, height: 2)
     board.stamp(x: 1, y: 1)

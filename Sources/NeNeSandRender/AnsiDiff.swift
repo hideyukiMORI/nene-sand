@@ -49,6 +49,10 @@ public enum AnsiDiff {
       return " "
     case .upperHalf:
       return "▀"
+    case .text(let character):
+      return String(character)
+    case .gap:
+      return ""
     }
   }
 

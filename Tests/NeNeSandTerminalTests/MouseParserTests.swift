@@ -29,6 +29,13 @@ struct MouseParserTests {
   }
 
   @Test
+  func digitsChooseMaterials() {
+    var parser = MouseParser()
+    #expect(parser.feed([UInt8(ascii: "1")]) == [.material(.sand)])
+    #expect(parser.feed([UInt8(ascii: "2")]) == [.material(.water)])
+  }
+
+  @Test
   func rightClickIsIgnored() {
     var parser = MouseParser()
     #expect(parser.feed(Array("\u{1b}[<2;1;1M".utf8)).isEmpty)

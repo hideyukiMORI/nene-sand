@@ -25,14 +25,27 @@ public struct MouseParser {
 
   private func consume(from index: Int, into events: inout [TerminalEvent]) -> Int {
     let byte = pending[index]
-    if byte == 0x03 || byte == UInt8(ascii: "q") || byte == UInt8(ascii: "Q") {
-      events.append(.quit)
+    if let event = keyEvent(byte) {
+      events.append(event)
       return 1
     }
     if byte != 0x1b {
       return 1
     }
     return mouse(from: index, into: &events)
+  }
+
+  private func keyEvent(_ byte: UInt8) -> TerminalEvent? {
+    if byte == 0x03 || byte == UInt8(ascii: "q") || byte == UInt8(ascii: "Q") {
+      return .quit
+    }
+    if byte == UInt8(ascii: "1") {
+      return .material(.sand)
+    }
+    if byte == UInt8(ascii: "2") {
+      return .material(.water)
+    }
+    return nil
   }
 
   private func mouse(from index: Int, into events: inout [TerminalEvent]) -> Int {

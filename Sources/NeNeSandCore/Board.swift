@@ -21,8 +21,9 @@ public struct Board {
     while y < rows {
       var x = 0
       while x < columns {
-        if previous.grain(x: x, y: y) == .sand {
-          stamp(x: x, y: y)
+        let kept = previous.grain(x: x, y: y)
+        if kept != .empty {
+          stamp(x: x, y: y, grain: kept)
         }
         x += 1
       }
@@ -38,19 +39,21 @@ public struct Board {
     return cells[offset]
   }
 
-  public mutating func stamp(x: Int, y: Int) {
+  public mutating func stamp(x: Int, y: Int, grain: Grain = .sand) {
     guard let offset = offset(x: x, y: y) else {
       return
     }
-    cells[offset] = .sand
+    cells[offset] = grain
   }
 
   public mutating func tick() {
+    var settled = Array(repeating: false, count: cells.count)
     let columns = columnOrder()
-    var y = height - 2
+    let bias = step % 2 == 0 ? -1 : 1
+    var y = height - 1
     while y >= 0 {
       for x in columns {
-        move(x: x, y: y)
+        stepCell(x: x, y: y, bias: bias, settled: &settled)
       }
       y -= 1
     }
@@ -76,29 +79,33 @@ public struct Board {
     return Array(range.reversed())
   }
 
-  private mutating func move(x: Int, y: Int) {
-    guard grain(x: x, y: y) == .sand else {
+  private mutating func stepCell(x: Int, y: Int, bias: Int, settled: inout [Bool]) {
+    guard let from = offset(x: x, y: y), !settled[from] else {
       return
     }
-    if shift(x: x, y: y, dx: 0) {
-      return
+    let grain = cells[from]
+    for slide in grain.slides(bias: bias) {
+      if shift(from: from, grain: grain, slide: slide, settled: &settled) {
+        return
+      }
     }
-    let first = step % 2 == 0 ? -1 : 1
-    if shift(x: x, y: y, dx: first) {
-      return
-    }
-    _ = shift(x: x, y: y, dx: -first)
   }
 
-  private mutating func shift(x: Int, y: Int, dx: Int) -> Bool {
-    guard grain(x: x + dx, y: y + 1) == .empty else {
+  private mutating func shift(
+    from: Int, grain: Grain, slide: Slide, settled: inout [Bool]
+  ) -> Bool {
+    let destX = (from % width) + slide.dx
+    let destY = (from / width) + slide.dy
+    guard let to = offset(x: destX, y: destY), !settled[to] else {
       return false
     }
-    guard let from = offset(x: x, y: y), let to = offset(x: x + dx, y: y + 1) else {
+    let destination = cells[to]
+    guard grain.enters(destination) else {
       return false
     }
-    cells[from] = .empty
-    cells[to] = .sand
+    cells[from] = destination
+    cells[to] = grain
+    settled[to] = true
     return true
   }
 }

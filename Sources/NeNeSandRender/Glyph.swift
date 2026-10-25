@@ -2,6 +2,8 @@ public struct Glyph: Equatable, Sendable {
   public enum Shape: Equatable, Sendable {
     case blank
     case upperHalf
+    case text(Character)
+    case gap
   }
 
   public let shape: Shape
