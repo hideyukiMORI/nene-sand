@@ -5,29 +5,32 @@ public enum FramePainter {
   public static let water = CellColor(red: 64, green: 156, blue: 214)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
-  public static func paint(_ board: Board, brush: Grain) -> Frame {
-    var glyphs = label(brush, width: board.width)
+  public static func paint(_ board: Board, brush: Grain, automatic: Bool = false) -> Frame {
+    var glyphs = label(brush, width: board.width, automatic: automatic)
     glyphs.append(contentsOf: field(board))
     let rows = (board.height + 1) / 2
     return Frame(width: board.width, height: rows + 1, glyphs: glyphs)
   }
 
-  private static func label(_ brush: Grain, width: Int) -> [Glyph] {
+  private static func label(_ brush: Grain, width: Int, automatic: Bool) -> [Glyph] {
     var glyphs: [Glyph] = []
     var column = 0
     while column < width {
-      glyphs.append(labelGlyph(brush, column: column))
+      glyphs.append(labelGlyph(brush, column: column, automatic: automatic))
       column += 1
     }
     return glyphs
   }
 
-  private static func labelGlyph(_ brush: Grain, column: Int) -> Glyph {
+  private static func labelGlyph(_ brush: Grain, column: Int, automatic: Bool) -> Glyph {
     if column == 0 {
       return Glyph(shape: .text(name(brush)), foreground: color(brush), background: emptyColor)
     }
-    if column == 1 {
+    if column == 1 || (automatic && column == 3) {
       return Glyph(shape: .gap, foreground: emptyColor, background: emptyColor)
+    }
+    if automatic && column == 2 {
+      return Glyph(shape: .text("自"), foreground: color(brush), background: emptyColor)
     }
     return blank()
   }

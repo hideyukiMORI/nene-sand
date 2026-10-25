@@ -25,6 +25,22 @@ struct FramePainterTests {
   }
 
   @Test
+  func automaticMarkSitsBesideTheName() {
+    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .water, automatic: true)
+    #expect(frame.glyphs[0].shape == .text("水"))
+    #expect(frame.glyphs[1].shape == .gap)
+    #expect(frame.glyphs[2].shape == .text("自"))
+    #expect(frame.glyphs[3].shape == .gap)
+  }
+
+  @Test
+  func automaticMarkIsAbsentByDefault() {
+    let frame = FramePainter.paint(Board(width: 4, height: 2), brush: .sand)
+    #expect(frame.glyphs[2].shape == .blank)
+    #expect(frame.glyphs[3].shape == .blank)
+  }
+
+  @Test
   func waterColorsTheLowerHalf() {
     var board = Board(width: 1, height: 2)
     board.stamp(x: 0, y: 1, grain: .water)

@@ -18,6 +18,9 @@ struct SandLoop {
   private struct Pen {
     var grain: Grain = .sand
     var stroke: Cursor?
+    var automatic = false
+    var hand = AutomaticStroke()
+    var handAt: Cursor?
   }
 
   private struct Scene {
@@ -58,10 +61,17 @@ struct SandLoop {
     var current = resized(scene.board, to: size)
     scene.pen = apply(events, to: &current, pen: scene.pen)
     if clock.now >= scene.nextTick {
+      if scene.pen.automatic {
+        scene.pen = follow(scene.pen, on: &current)
+      }
       current.tick()
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
-    let frame = FramePainter.paint(current, brush: scene.pen.grain)
+    let frame = FramePainter.paint(
+      current,
+      brush: scene.pen.grain,
+      automatic: scene.pen.automatic
+    )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
     scene.previous = frame
     scene.board = current
@@ -76,7 +86,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material:
+    case .press, .drag, .release, .material, .automatic:
       return false
     }
   }
@@ -105,17 +115,57 @@ struct SandLoop {
     case .quit:
       return pen
     case .material(let key):
-      return Pen(grain: grain(for: key), stroke: nil)
+      var next = moved(pen, grain: grain(for: key), stroke: nil)
+      next.handAt = nil
+      return next
+    case .automatic:
+      return Pen(
+        grain: pen.grain,
+        stroke: nil,
+        automatic: !pen.automatic,
+        hand: AutomaticStroke(),
+        handAt: nil
+      )
     case .press(let cursor):
       stampCell(cursor, grain: pen.grain, on: &board)
-      return Pen(grain: pen.grain, stroke: cursor)
+      return moved(pen, grain: pen.grain, stroke: cursor)
     case .drag(let cursor):
       let start = pen.stroke ?? cursor
       connect(from: start, to: cursor, grain: pen.grain, on: &board)
-      return Pen(grain: pen.grain, stroke: cursor)
+      return moved(pen, grain: pen.grain, stroke: cursor)
     case .release:
-      return Pen(grain: pen.grain, stroke: nil)
+      return moved(pen, grain: pen.grain, stroke: nil)
     }
+  }
+
+  private func moved(_ pen: Pen, grain: Grain, stroke: Cursor?) -> Pen {
+    Pen(
+      grain: grain,
+      stroke: stroke,
+      automatic: pen.automatic,
+      hand: pen.hand,
+      handAt: pen.handAt
+    )
+  }
+
+  private func follow(_ pen: Pen, on board: inout Board) -> Pen {
+    var next = pen
+    let rows = board.height / 2
+    guard let point = next.hand.next(width: board.width, height: rows) else {
+      if next.handAt != nil {
+        next.grain = AutomaticStroke.nextBrush(next.grain)
+      }
+      next.handAt = nil
+      return next
+    }
+    let cursor = Cursor(column: point.x, row: point.y + 1)
+    if let previous = next.handAt {
+      connect(from: previous, to: cursor, grain: next.grain, on: &board)
+    } else {
+      stampCell(cursor, grain: next.grain, on: &board)
+    }
+    next.handAt = cursor
+    return next
   }
 
   private func grain(for key: BrushKey) -> Grain {
