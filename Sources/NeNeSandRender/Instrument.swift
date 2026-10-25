@@ -192,25 +192,25 @@ public enum Instrument {
 
   private static func palette(_ brush: Grain, open: Bool, wide: Bool, theme: Theme) -> [Glyph] {
     chip(
-      Sample(key: "1", name: "sand", color: Theme.sand, on: brush == .sand, shut: false),
+      Sample(key: "1", name: "sand", color: theme.ink(.sand), on: brush == .sand, shut: false),
       wide: wide, theme: theme)
       + chip(
-        Sample(key: "2", name: "water", color: Theme.water, on: brush == .water, shut: false),
+        Sample(key: "2", name: "water", color: theme.ink(.water), on: brush == .water, shut: false),
         wide: wide, theme: theme)
       + chip(
-        Sample(key: "3", name: "oil", color: Theme.oil, on: brush == .oil, shut: false),
+        Sample(key: "3", name: "oil", color: theme.ink(.oil), on: brush == .oil, shut: false),
         wide: wide, theme: theme)
       + chip(
-        Sample(key: "4", name: "fire", color: Theme.fire, on: brush == .fire, shut: false),
+        Sample(key: "4", name: "fire", color: theme.ink(.fire), on: brush == .fire, shut: false),
         wide: wide, theme: theme)
       + chip(
-        Sample(key: "5", name: "wood", color: Theme.wood, on: brush == .wood, shut: false),
+        Sample(key: "5", name: "wood", color: theme.ink(.wood), on: brush == .wood, shut: false),
         wide: wide, theme: theme)
       + chip(
-        Sample(key: "6", name: "lava", color: Theme.lava, on: brush == .lava, shut: false),
+        Sample(key: "6", name: "lava", color: theme.ink(.lava), on: brush == .lava, shut: false),
         wide: wide, theme: theme)
       + chip(
-        Sample(key: "7", name: "stone", color: Theme.stone, on: brush == .stone, shut: !open),
+        Sample(key: "7", name: "stone", color: theme.ink(.stone), on: brush == .stone, shut: !open),
         wide: wide, theme: theme)
   }
 
@@ -295,7 +295,7 @@ public enum Instrument {
   private static func tone(_ mode: Mode, brush: Grain, theme: Theme) -> CellColor {
     switch mode {
     case .quiet:
-      return grainColor(brush, theme: theme)
+      return theme.ink(brush)
     case .hold:
       return theme.chrome.hold
     case .auto:
@@ -404,27 +404,6 @@ public enum Instrument {
       return "lava thinks twice."
     case .stone:
       return "stone remembers."
-    }
-  }
-
-  private static func grainColor(_ grain: Grain, theme: Theme) -> CellColor {
-    switch grain {
-    case .empty:
-      return theme.ground()
-    case .sand:
-      return Theme.sand
-    case .water:
-      return Theme.water
-    case .oil:
-      return Theme.oil
-    case .fire:
-      return Theme.fire
-    case .wood:
-      return Theme.wood
-    case .lava:
-      return Theme.lava
-    case .stone:
-      return Theme.stone
     }
   }
 

@@ -18,7 +18,7 @@ struct FramePainterTests {
     let frame = FramePainter.paint(board, brush: .sand)
     let field = FramePainter.topRows
     #expect(frame.glyphs[field].shape == .upperHalf)
-    #expect(frame.glyphs[field].foreground == Theme.sand)
+    #expect(frame.glyphs[field].foreground == Theme.phosphor.ink(.sand))
     #expect(frame.glyphs[field].background == Theme.phosphor.ground())
   }
 
@@ -100,7 +100,12 @@ struct FramePainterTests {
       marks: FramePainter.Marks(theme: .amber)
     )
     let field = frame.glyphs[FramePainter.topRows]
-    #expect(field.foreground == Theme.sand)
+    let sand = Theme.amber.ink(.sand)
+    let water = Theme.amber.ink(.water)
+    #expect(field.foreground == sand)
+    #expect(sand != Theme.phosphor.ink(.sand))
+    #expect(sand.red > sand.blue)
+    #expect(water.blue > water.red)
     #expect(field.background == Theme.amber.ground())
     #expect(Theme.amber.ground() != Theme.phosphor.ground())
     let wide = FramePainter.paint(
@@ -130,13 +135,13 @@ struct FramePainterTests {
   @Test
   func materialsColorTheField() {
     let samples: [(Grain, CellColor)] = [
-      (.sand, Theme.sand),
-      (.water, Theme.water),
-      (.oil, Theme.oil),
-      (.fire, Theme.fire),
-      (.wood, Theme.wood),
-      (.lava, Theme.lava),
-      (.stone, Theme.stone),
+      (.sand, Theme.phosphor.ink(.sand)),
+      (.water, Theme.phosphor.ink(.water)),
+      (.oil, Theme.phosphor.ink(.oil)),
+      (.fire, Theme.phosphor.ink(.fire)),
+      (.wood, Theme.phosphor.ink(.wood)),
+      (.lava, Theme.phosphor.ink(.lava)),
+      (.stone, Theme.phosphor.ink(.stone)),
     ]
     for sample in samples {
       var board = Board(width: 1, height: 2)
