@@ -158,6 +158,48 @@ struct BoardTests {
   }
 
   @Test
+  func buriedWaterGapCloses() {
+    var board = Board(width: 1, height: 4)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 0, y: 3, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 0, y: 2) == .water)
+    #expect(board.grain(x: 0, y: 3) == .water)
+    #expect(board.count(of: .water) == 2)
+  }
+
+  @Test
+  func buriedBarCloses() {
+    var board = Board(width: 5, height: 4)
+    var x = 0
+    while x < 5 {
+      board.stamp(x: x, y: 0, grain: .water)
+      board.stamp(x: x, y: 3, grain: .sand)
+      x += 1
+    }
+    board.tick()
+    x = 0
+    while x < 5 {
+      #expect(board.grain(x: x, y: 2) == .water)
+      #expect(board.grain(x: x, y: 3) == .sand)
+      x += 1
+    }
+    #expect(board.count(of: .water) == 5)
+    #expect(board.count(of: .sand) == 5)
+  }
+
+  @Test
+  func openSandStillFallsOneCell() {
+    var board = Board(width: 3, height: 8)
+    board.stamp(x: 1, y: 0)
+    board.stamp(x: 1, y: 7)
+    board.tick()
+    #expect(board.grain(x: 1, y: 1) == .sand)
+    #expect(board.grain(x: 1, y: 7) == .sand)
+    #expect(board.grain(x: 1, y: 2) == .empty)
+  }
+
+  @Test
   func resizeKeepsOverlap() {
     var board = Board(width: 2, height: 2)
     board.stamp(x: 1, y: 1)
