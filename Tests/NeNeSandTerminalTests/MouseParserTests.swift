@@ -8,9 +8,9 @@ struct MouseParserTests {
     let pressed = parser.feed(Array("\u{1b}[<0;2;3M".utf8))
     let dragged = parser.feed(Array("\u{1b}[<32;4;3M".utf8))
     let released = parser.feed(Array("\u{1b}[<0;4;3m".utf8))
-    #expect(pressed == [.press(Cursor(column: 1, row: 2))])
-    #expect(dragged == [.drag(Cursor(column: 3, row: 2))])
-    #expect(released == [.release(Cursor(column: 3, row: 2))])
+    #expect(pressed == [.press(Cursor(column: 1, row: 2), .draw)])
+    #expect(dragged == [.drag(Cursor(column: 3, row: 2), .draw)])
+    #expect(released == [.release(Cursor(column: 3, row: 2), .draw)])
   }
 
   @Test
@@ -18,7 +18,7 @@ struct MouseParserTests {
     var parser = MouseParser()
     #expect(parser.feed(Array("\u{1b}[<0;2;3".utf8)).isEmpty)
     let finished = parser.feed(Array("M".utf8))
-    #expect(finished == [.press(Cursor(column: 1, row: 2))])
+    #expect(finished == [.press(Cursor(column: 1, row: 2), .draw)])
   }
 
   @Test
@@ -48,8 +48,19 @@ struct MouseParserTests {
   }
 
   @Test
-  func rightClickIsIgnored() {
+  func rightClickErases() {
     var parser = MouseParser()
-    #expect(parser.feed(Array("\u{1b}[<2;1;1M".utf8)).isEmpty)
+    let pressed = parser.feed(Array("\u{1b}[<2;2;3M".utf8))
+    let dragged = parser.feed(Array("\u{1b}[<34;4;3M".utf8))
+    let released = parser.feed(Array("\u{1b}[<2;4;3m".utf8))
+    #expect(pressed == [.press(Cursor(column: 1, row: 2), .erase)])
+    #expect(dragged == [.drag(Cursor(column: 3, row: 2), .erase)])
+    #expect(released == [.release(Cursor(column: 3, row: 2), .erase)])
+  }
+
+  @Test
+  func middleClickIsIgnored() {
+    var parser = MouseParser()
+    #expect(parser.feed(Array("\u{1b}[<1;1;1M".utf8)).isEmpty)
   }
 }
