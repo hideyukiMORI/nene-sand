@@ -66,12 +66,39 @@ public struct TerminalSession {
   }
 
   public func write(_ text: String) {
-    let bytes = Array(text.utf8)
-    guard !bytes.isEmpty else {
-      return
+    Self.writeAll(Array(text.utf8), to: STDOUT_FILENO)
+  }
+
+  static func writeAll(_ bytes: [UInt8], to descriptor: Int32) {
+    var offset = 0
+    while offset < bytes.count {
+      let wrote = Self.writeSome(bytes, at: offset, to: descriptor)
+      if wrote > 0 {
+        offset += wrote
+      } else if !Self.again(wrote, on: descriptor) {
+        return
+      }
     }
+  }
+
+  private static func again(_ wrote: Int, on descriptor: Int32) -> Bool {
+    if wrote < 0 && errno == EINTR {
+      return true
+    }
+    if wrote < 0 && (errno == EAGAIN || errno == EWOULDBLOCK) {
+      var waiting = pollfd(fd: descriptor, events: Int16(POLLOUT), revents: 0)
+      while Glibc.poll(&waiting, 1, -1) < 0 && errno == EINTR {}
+      return true
+    }
+    return false
+  }
+
+  private static func writeSome(_ bytes: [UInt8], at offset: Int, to descriptor: Int32) -> Int {
     bytes.withUnsafeBufferPointer { buffer in
-      _ = Glibc.write(STDOUT_FILENO, buffer.baseAddress, buffer.count)
+      guard let base = buffer.baseAddress else {
+        return -1
+      }
+      return Glibc.write(descriptor, base.advanced(by: offset), bytes.count - offset)
     }
   }
 
