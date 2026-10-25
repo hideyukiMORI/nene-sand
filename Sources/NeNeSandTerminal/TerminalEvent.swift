@@ -4,4 +4,5 @@ public enum TerminalEvent: Equatable, Sendable {
   case drag(Cursor)
   case release(Cursor)
   case material(BrushKey)
+  case automatic
 }
