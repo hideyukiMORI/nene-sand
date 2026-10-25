@@ -11,7 +11,7 @@ public enum Instrument {
 
   public static func bottom(width: Int, brush: Grain, marks: FramePainter.Marks) -> [Glyph] {
     let mode = mode(marks)
-    return status(width, brush: brush, mode: mode, theme: marks.theme)
+    return status(width, brush: brush, mode: mode, marks: marks)
       + aside(width, brush: brush, mode: mode, theme: marks.theme)
       + help(width, theme: marks.theme)
   }
@@ -121,12 +121,15 @@ public enum Instrument {
     )
   }
 
-  private static func status(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {
+  private static func status(_ width: Int, brush: Grain, mode: Mode, marks: FramePainter.Marks)
+    -> [Glyph]
+  {
+    let theme = marks.theme
     let ink = theme.chrome
     let voice = tone(mode, brush: brush, theme: theme)
     if width >= namedWidth {
       return compose(
-        [
+        worth(marks) + [
           .text(" >> ", voice, ink.ground),
           .text(tag(mode, brush: brush), voice, ink.ground),
           .text(" :: ", ink.frameBright, ink.ground),
@@ -139,7 +142,7 @@ public enum Instrument {
       )
     }
     return compose(
-      [
+      worth(marks) + [
         .text(">> ", voice, ink.ground),
         .text(tag(mode, brush: brush), voice, ink.ground),
         .text(" " + line(mode, brush: brush), ink.accent, ink.ground),
@@ -148,6 +151,14 @@ public enum Instrument {
       width: width,
       theme: theme
     )
+  }
+
+  private static func worth(_ marks: FramePainter.Marks) -> [Part] {
+    if !marks.earning {
+      return []
+    }
+    let ink = marks.theme.chrome
+    return [.text(" $ " + String(marks.purse.amount), ink.accent, ink.ground)]
   }
 
   private static func aside(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {

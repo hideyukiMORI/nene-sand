@@ -151,6 +151,29 @@ struct FramePainterTests {
     }
   }
 
+  @Test
+  func earningShowsThePurseAndTheMouth() {
+    let board = Board(width: 80, height: 2)
+    let frame = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(purse: Purse.zero.collecting(.lava), earning: true)
+    )
+    #expect(shown(frame, row: 4).contains("$ 32"))
+    let mouth = FramePainter.topRows * board.width + board.width / 2
+    #expect(frame.glyphs[mouth].background == Theme.phosphor.accent())
+  }
+
+  @Test
+  func freePlayHidesThePurse() {
+    let frame = FramePainter.paint(
+      Board(width: 80, height: 2),
+      brush: .sand,
+      marks: FramePainter.Marks(stone: .free, purse: Purse.zero.collecting(.oil))
+    )
+    #expect(!shown(frame, row: 4).contains("$"))
+  }
+
   private func shown(_ frame: Frame, row: Int) -> String {
     var text = ""
     var column = 0

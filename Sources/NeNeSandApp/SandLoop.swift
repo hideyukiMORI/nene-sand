@@ -32,6 +32,7 @@ struct SandLoop {
     var board: Board?
     var previous: Frame?
     var pen = Pen()
+    var purse = Purse.zero
     var toldTooSmall = false
     var nextTick: ContinuousClock.Instant
   }
@@ -66,10 +67,7 @@ struct SandLoop {
     var current = resized(scene.board, to: size)
     scene.pen = apply(events, to: &current, pen: scene.pen)
     if !scene.pen.paused && clock.now >= scene.nextTick {
-      if scene.pen.automatic {
-        scene.pen = follow(scene.pen, on: &current)
-      }
-      current.tick()
+      step(&current, pen: &scene.pen, purse: &scene.purse)
       scene.nextTick = clock.now.advanced(by: Self.step)
     }
     let frame = FramePainter.paint(
@@ -80,7 +78,9 @@ struct SandLoop {
         stone: stoneMark(scene.pen, known: current.stoneKnown),
         paused: scene.pen.paused,
         width: scene.pen.reach * 2 + 1,
-        theme: scene.pen.theme
+        theme: scene.pen.theme,
+        purse: scene.purse,
+        earning: !scene.pen.freely
       )
     )
     session.write(AnsiDiff.text(previous: scene.previous, next: frame, trueColor: trueColor))
@@ -100,6 +100,23 @@ struct SandLoop {
     case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely, .theme:
       return false
     }
+  }
+
+  private func step(_ board: inout Board, pen: inout Pen, purse: inout Purse) {
+    if pen.automatic {
+      pen = follow(pen, on: &board)
+    }
+    let gathered = earned(board, pen: pen, purse: purse)
+    board = gathered.board
+    purse = gathered.purse
+    board.tick()
+  }
+
+  private func earned(_ board: Board, pen: Pen, purse: Purse) -> Collector.Gathering {
+    if pen.freely {
+      return Collector.Gathering(board: board, purse: purse)
+    }
+    return Collector.gather(board, into: purse)
   }
 
   private func resized(_ board: Board?, to size: (columns: Int, rows: Int)) -> Board {
