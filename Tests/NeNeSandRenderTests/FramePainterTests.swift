@@ -7,11 +7,14 @@ struct FramePainterTests {
   func emptyBoardIsBlank() {
     let frame = FramePainter.paint(Board(width: 2, height: 2), brush: .sand)
     #expect(frame.width == 2)
-    #expect(frame.height == 2)
+    #expect(frame.height == 2 + FramePainter.deckRows)
+    #expect(frame.glyphs.count == frame.width * frame.height)
     #expect(frame.glyphs[0].shape == .text("砂"))
     #expect(frame.glyphs[1].shape == .gap)
     #expect(frame.glyphs[2].shape == .blank)
     #expect(frame.glyphs[3].shape == .blank)
+    #expect(frame.glyphs[4].shape == .text("S"))
+    #expect(frame.glyphs[5].shape == .text("A"))
   }
 
   @Test
@@ -154,5 +157,72 @@ struct FramePainterTests {
     let frame = FramePainter.paint(board, brush: .water)
     #expect(frame.glyphs[0].shape == .text("水"))
     #expect(frame.glyphs[1].background == FramePainter.water)
+  }
+
+  @Test
+  func deckSitsUnderTheField() {
+    let frame = FramePainter.paint(Board(width: 72, height: 2), brush: .sand)
+    let fieldRows = 1
+    #expect(frame.height == fieldRows + 1 + FramePainter.deckRows)
+    #expect(shown(frame, row: fieldRows + 1).contains("SAND"))
+    #expect(shown(frame, row: fieldRows + 1).contains("交渉は短い"))
+    #expect(shown(frame, row: fieldRows + 2).contains("1砂"))
+    #expect(shown(frame, row: fieldRows + 2).contains("q終"))
+    #expect(frame.glyphs[(fieldRows + 1) * frame.width].foreground == FramePainter.phosphor)
+  }
+
+  @Test
+  func deckPrefersTheModeOverTheMaterial() {
+    let paused = FramePainter.paint(
+      Board(width: 72, height: 2),
+      brush: .sand,
+      marks: FramePainter.Marks(paused: true)
+    )
+    let automatic = FramePainter.paint(
+      Board(width: 72, height: 2),
+      brush: .sand,
+      marks: FramePainter.Marks(automatic: true)
+    )
+    let free = FramePainter.paint(
+      Board(width: 72, height: 2),
+      brush: .water,
+      marks: FramePainter.Marks(stone: .free)
+    )
+    #expect(shown(paused, row: 2).contains("HOLD"))
+    #expect(shown(automatic, row: 2).contains("AUTO"))
+    #expect(shown(free, row: 2).contains("FREE"))
+    #expect(shown(free, row: 2).contains("通貨は無い"))
+  }
+
+  @Test
+  func deckNamesEachBrush() {
+    let voices: [(Grain, String)] = [
+      (.water, "H2O"),
+      (.oil, "OIL"),
+      (.fire, "FIRE"),
+      (.wood, "WOOD"),
+      (.lava, "LAVA"),
+      (.stone, "ROCK"),
+    ]
+    for voice in voices {
+      let frame = FramePainter.paint(Board(width: 72, height: 2), brush: voice.0)
+      #expect(shown(frame, row: 2).contains(voice.1))
+    }
+  }
+
+  private func shown(_ frame: Frame, row: Int) -> String {
+    var text = ""
+    var column = 0
+    while column < frame.width {
+      let glyph = frame.glyphs[row * frame.width + column]
+      switch glyph.shape {
+      case .text(let character):
+        text.append(character)
+      case .blank, .upperHalf, .gap:
+        break
+      }
+      column += 1
+    }
+    return text
   }
 }

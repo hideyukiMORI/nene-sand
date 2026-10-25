@@ -101,7 +101,7 @@ struct SandLoop {
   }
 
   private func resized(_ board: Board?, to size: (columns: Int, rows: Int)) -> Board {
-    let height = (size.rows - 1) * 2
+    let height = (size.rows - 1 - FramePainter.deckRows) * 2
     guard let board else {
       return Board(width: size.columns, height: height)
     }
@@ -289,6 +289,10 @@ struct SandLoop {
   }
 
   private func stampBrush(_ cursor: Cursor, dab: Dab, on board: inout Board) {
+    let fieldRow = cursor.row - 1
+    guard fieldRow >= 0 && fieldRow < board.height / 2 else {
+      return
+    }
     let cells = Brush.cells(around: Point(x: cursor.column, y: cursor.row), reach: dab.reach)
     for cell in cells {
       stampCell(Cursor(column: cell.x, row: cell.y), grain: dab.grain, on: &board)

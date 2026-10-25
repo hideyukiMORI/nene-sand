@@ -9,6 +9,9 @@ public enum FramePainter {
   public static let lava = CellColor(red: 196, green: 48, blue: 24)
   public static let stone = CellColor(red: 132, green: 136, blue: 144)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
+  public static let phosphor = CellColor(red: 72, green: 220, blue: 176)
+  public static let phosphorDim = CellColor(red: 48, green: 140, blue: 124)
+  public static let deckRows = 2
 
   public enum StoneMark: Equatable, Sendable {
     case hidden
@@ -38,8 +41,9 @@ public enum FramePainter {
   public static func paint(_ board: Board, brush: Grain, marks: Marks = Marks()) -> Frame {
     var glyphs = label(brush, width: board.width, marks: marks)
     glyphs.append(contentsOf: field(board))
+    glyphs.append(contentsOf: deck(board.width, brush: brush, marks: marks))
     let rows = (board.height + 1) / 2
-    return Frame(width: board.width, height: rows + 1, glyphs: glyphs)
+    return Frame(width: board.width, height: rows + 1 + deckRows, glyphs: glyphs)
   }
 
   private static func label(_ brush: Grain, width: Int, marks: Marks) -> [Glyph] {
@@ -201,5 +205,77 @@ public enum FramePainter {
     case .stone:
       return stone
     }
+  }
+
+  private static let helpText =
+    "1砂 2水 3油 4火 5木 6溶 7石  L描 R消 c全 sp停 []筆 a自 m遊 q終"
+
+  private static func deck(_ width: Int, brush: Grain, marks: Marks) -> [Glyph] {
+    var glyphs = line(remark(brush, marks: marks), width: width, ink: phosphor)
+    glyphs.append(contentsOf: line(helpText, width: width, ink: phosphorDim))
+    return glyphs
+  }
+
+  private static func remark(_ brush: Grain, marks: Marks) -> String {
+    if marks.paused {
+      return "HOLD // 物理は停止。マウスはまだ書ける。"
+    }
+    if marks.automatic {
+      return "AUTO // 筆がひとりで歩く。線ごとに物質が回る。"
+    }
+    if marks.stone == .free {
+      return "FREE // 石を先に開放。このモードに通貨は無い。"
+    }
+    return voice(brush)
+  }
+
+  private static func voice(_ grain: Grain) -> String {
+    switch grain {
+    case .empty:
+      return "IDLE // 筆が空。まだ何も書いていない。"
+    case .sand:
+      return "SAND // 落ちて積もる。液体より重く、交渉は短い。"
+    case .water:
+      return "H2O  // 低い方へ流れる。平らになると、往復をやめる。"
+    case .oil:
+      return "OIL  // 水の上で余裕を見せる。火とは仲が悪い。"
+    case .fire:
+      return "FIRE // 上へ揺れて、48tickで消える。水が消火器。"
+    case .wood:
+      return "WOOD // 落ちない固体。燃えることだけは素直。"
+    case .lava:
+      return "LAVA // 偶数tickだけ歩く。水に触れると石になる。"
+    case .stone:
+      return "ROCK // 落ちて溜まる。一度覚えたら、盤を縮めても残る。"
+    }
+  }
+
+  private static func line(_ text: String, width: Int, ink: CellColor) -> [Glyph] {
+    var glyphs: [Glyph] = []
+    var column = 0
+    for character in text {
+      let span = columns(character)
+      if column + span > width {
+        break
+      }
+      glyphs.append(Glyph(shape: .text(character), foreground: ink, background: emptyColor))
+      column += 1
+      if span == 2 && column < width {
+        glyphs.append(Glyph(shape: .gap, foreground: emptyColor, background: emptyColor))
+        column += 1
+      }
+    }
+    while column < width {
+      glyphs.append(blank())
+      column += 1
+    }
+    return glyphs
+  }
+
+  private static func columns(_ character: Character) -> Int {
+    if character.unicodeScalars.allSatisfy({ $0.value < 128 }) {
+      return 1
+    }
+    return 2
   }
 }
