@@ -21,6 +21,7 @@ struct SandLoop {
     var stroke: Cursor?
     var automatic = false
     var paused = false
+    var freely = false
     var reach = 0
     var hand = AutomaticStroke()
     var handAt: Cursor?
@@ -75,7 +76,7 @@ struct SandLoop {
       brush: scene.pen.grain,
       marks: FramePainter.Marks(
         automatic: scene.pen.automatic,
-        stoneKnown: current.stoneKnown,
+        stone: stoneMark(scene.pen, known: current.stoneKnown),
         paused: scene.pen.paused,
         width: scene.pen.reach * 2 + 1
       )
@@ -94,7 +95,7 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush:
+    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
       return false
     }
   }
@@ -123,12 +124,7 @@ struct SandLoop {
     case .quit:
       return pen
     case .material(let key):
-      if key == .stone && !board.stoneKnown {
-        return pen
-      }
-      var next = moved(pen, grain: grain(for: key), stroke: nil)
-      next.handAt = nil
-      return next
+      return chosen(pen, key: key, known: board.stoneKnown)
     case .clear:
       board.clear()
       var next = moved(pen, grain: pen.grain, stroke: nil)
@@ -138,12 +134,15 @@ struct SandLoop {
       return toggled(pen)
     case .brush(let delta):
       return sized(pen, delta: delta)
+    case .freely:
+      return freed(pen, known: board.stoneKnown)
     case .automatic:
       return Pen(
         grain: pen.grain,
         stroke: nil,
         automatic: !pen.automatic,
         paused: pen.paused,
+        freely: pen.freely,
         reach: pen.reach,
         hand: AutomaticStroke(),
         handAt: nil
@@ -166,6 +165,7 @@ struct SandLoop {
       stroke: stroke,
       automatic: pen.automatic,
       paused: pen.paused,
+      freely: pen.freely,
       reach: pen.reach,
       hand: pen.hand,
       handAt: pen.handAt
@@ -224,6 +224,38 @@ struct SandLoop {
   private struct Dab {
     var grain: Grain
     var reach: Int
+  }
+
+  private func chosen(_ pen: Pen, key: BrushKey, known: Bool) -> Pen {
+    if key == .stone && !allowsStone(pen, known: known) {
+      return pen
+    }
+    var next = moved(pen, grain: grain(for: key), stroke: nil)
+    next.handAt = nil
+    return next
+  }
+
+  private func freed(_ pen: Pen, known: Bool) -> Pen {
+    var next = pen
+    next.freely.toggle()
+    if next.grain == .stone && !allowsStone(next, known: known) {
+      next.grain = .sand
+    }
+    return next
+  }
+
+  private func allowsStone(_ pen: Pen, known: Bool) -> Bool {
+    pen.freely || known
+  }
+
+  private func stoneMark(_ pen: Pen, known: Bool) -> FramePainter.StoneMark {
+    if pen.freely {
+      return .free
+    }
+    if known {
+      return .known
+    }
+    return .hidden
   }
 
   private func toggled(_ pen: Pen) -> Pen {
