@@ -10,11 +10,11 @@ enum LiquidMotion {
   }
 
   static func canLevel(from surface: Int, toward neighbor: Int) -> Bool {
-    neighbor > surface + 1
+    neighbor > surface
   }
 
-  static func oneLower(from surface: Int, toward neighbor: Int) -> Bool {
-    neighbor == surface + 1
+  static func steep(from surface: Int, toward neighbor: Int) -> Bool {
+    neighbor > surface + 1
   }
 
   static func keepsCourse(drift: Int, dx: Int) -> Bool {

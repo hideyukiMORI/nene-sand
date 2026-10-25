@@ -210,24 +210,16 @@ public struct Board {
     }
     let from = surface(x)
     let toward = surface(x + dx)
-    if LiquidMotion.canLevel(from: from, toward: toward) {
-      return true
-    }
-    if !LiquidMotion.oneLower(from: from, toward: toward) || liquidSupports(x + dx, y) {
+    if !LiquidMotion.canLevel(from: from, toward: toward) {
       return false
+    }
+    if LiquidMotion.steep(from: from, toward: toward) {
+      return true
     }
     guard let index = offset(x: x, y: y) else {
       return false
     }
     return LiquidMotion.keepsCourse(drift: drift[index], dx: dx)
-  }
-
-  private func liquidSupports(_ x: Int, _ y: Int) -> Bool {
-    let below = y + 1
-    if below >= height {
-      return false
-    }
-    return grain(x: x, y: below).flows()
   }
 
   private func boundarySlide(_ slide: Slide, x: Int, y: Int) -> Bool {
@@ -238,7 +230,16 @@ public struct Board {
       return false
     }
     let neighbor = oilWaterLine(x + slide.dx)
-    return LiquidMotion.canLevel(from: y, toward: neighbor)
+    if !LiquidMotion.canLevel(from: y, toward: neighbor) {
+      return false
+    }
+    if LiquidMotion.steep(from: y, toward: neighbor) {
+      return true
+    }
+    guard let index = offset(x: x, y: y) else {
+      return false
+    }
+    return LiquidMotion.keepsCourse(drift: drift[index], dx: slide.dx)
   }
 
   private enum LineLook {
