@@ -91,7 +91,7 @@ public struct Board {
     }
     let grain = cells[from]
     for slide in grain.slides(bias: bias) {
-      if grain == .water && !waterMaySlide(slide, x: x, y: y, from: from) {
+      if grain.flows() && !liquidMaySlide(slide, x: x, y: y, from: from) {
         continue
       }
       if shift(from: from, grain: grain, slide: slide, settled: &settled) {
@@ -100,18 +100,83 @@ public struct Board {
     }
   }
 
-  private func waterMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+  private func liquidMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
     if slide.dy != 0 {
+      return true
+    }
+    if boundarySlide(slide, x: x, y: y, from: from) {
       return true
     }
     if y > 0 && grain(x: x, y: y - 1) != .empty {
       return false
     }
     let toward = surface(x + slide.dx)
-    if !WaterMotion.canLevel(from: surface(x), toward: toward) {
+    if !LiquidMotion.canLevel(from: surface(x), toward: toward) {
       return false
     }
-    return WaterMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+    return LiquidMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+  }
+
+  private func boundarySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+    if grain(x: x, y: y) != .water {
+      return false
+    }
+    if y == 0 || grain(x: x, y: y - 1) != .oil {
+      return false
+    }
+    let neighbor = oilWaterLine(x + slide.dx)
+    if !LiquidMotion.canLevel(from: y, toward: neighbor) {
+      return false
+    }
+    return LiquidMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+  }
+
+  private enum LineLook {
+    case skip
+    case blocked
+    case found(Int)
+  }
+
+  private func oilWaterLine(_ x: Int) -> Int {
+    guard x >= 0, x < width else {
+      return -1
+    }
+    var y = 0
+    var seenOil = false
+    while y < height {
+      switch lineUnderOil(grain(x: x, y: y), seenOil: seenOil, y: y) {
+      case .found(let line):
+        return line
+      case .blocked:
+        return -1
+      case .skip:
+        if grain(x: x, y: y) == .oil {
+          seenOil = true
+        }
+      }
+      y += 1
+    }
+    if seenOil {
+      return height
+    }
+    return -1
+  }
+
+  private func lineUnderOil(_ grain: Grain, seenOil: Bool, y: Int) -> LineLook {
+    switch grain {
+    case .water:
+      if seenOil {
+        return .found(y)
+      }
+      return .skip
+    case .sand:
+      if seenOil {
+        return .blocked
+      }
+      return .skip
+    case .oil, .empty:
+      return .skip
+    }
   }
 
   private func surface(_ x: Int) -> Int {
@@ -152,7 +217,7 @@ public struct Board {
   }
 
   private mutating func settleDrift(_ grain: Grain, slide: Slide, to: Int) {
-    if grain != .water {
+    if !grain.flows() {
       return
     }
     drift[to] = slide.dy == 0 ? slide.dx : 0

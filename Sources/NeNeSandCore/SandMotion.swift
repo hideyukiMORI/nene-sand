@@ -9,7 +9,7 @@ enum SandMotion {
 
   static func enters(_ destination: Grain) -> Bool {
     switch destination {
-    case .empty, .water:
+    case .empty, .water, .oil:
       return true
     case .sand:
       return false

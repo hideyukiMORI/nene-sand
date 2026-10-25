@@ -9,6 +9,8 @@ public struct AutomaticStroke: Sendable {
     case .sand:
       return .water
     case .water:
+      return .oil
+    case .oil:
       return .sand
     case .empty:
       return .sand

@@ -3,6 +3,7 @@ import NeNeSandCore
 public enum FramePainter {
   public static let sand = CellColor(red: 214, green: 176, blue: 92)
   public static let water = CellColor(red: 64, green: 156, blue: 214)
+  public static let oil = CellColor(red: 168, green: 124, blue: 36)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
   public static func paint(_ board: Board, brush: Grain, automatic: Bool = false) -> Frame {
@@ -75,6 +76,8 @@ public enum FramePainter {
       return "砂"
     case .water:
       return "水"
+    case .oil:
+      return "油"
     }
   }
 
@@ -86,6 +89,8 @@ public enum FramePainter {
       return sand
     case .water:
       return water
+    case .oil:
+      return oil
     }
   }
 }
