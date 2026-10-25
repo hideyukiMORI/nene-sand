@@ -46,10 +46,11 @@ struct AutomaticStrokeTests {
   }
 
   @Test
-  func brushCyclesSandWaterAndOil() {
+  func brushCyclesSandWaterOilAndFire() {
     #expect(AutomaticStroke.nextBrush(.sand) == .water)
     #expect(AutomaticStroke.nextBrush(.water) == .oil)
-    #expect(AutomaticStroke.nextBrush(.oil) == .sand)
+    #expect(AutomaticStroke.nextBrush(.oil) == .fire)
+    #expect(AutomaticStroke.nextBrush(.fire) == .sand)
     #expect(AutomaticStroke.nextBrush(.empty) == .sand)
   }
 

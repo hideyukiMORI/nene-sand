@@ -176,6 +176,8 @@ struct SandLoop {
       return .water
     case .oil:
       return .oil
+    case .fire:
+      return .fire
     }
   }
 

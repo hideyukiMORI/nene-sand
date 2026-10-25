@@ -3,6 +3,7 @@ public struct Board {
   public let height: Int
   private var cells: [Grain]
   private var drift: [Int]
+  private var age: [Int]
   private var step: Int
 
   public init(width: Int, height: Int) {
@@ -13,6 +14,7 @@ public struct Board {
     let count = safeWidth * safeHeight
     self.cells = Array(repeating: .empty, count: count)
     self.drift = Array(repeating: 0, count: count)
+    self.age = Array(repeating: 0, count: count)
     self.step = 0
   }
 
@@ -28,6 +30,7 @@ public struct Board {
         if kept != .empty {
           stamp(x: x, y: y, grain: kept)
           copyDrift(from: previous, x: x, y: y)
+          copyAge(from: previous, x: x, y: y)
         }
         x += 1
       }
@@ -49,6 +52,7 @@ public struct Board {
     }
     cells[offset] = grain
     drift[offset] = 0
+    age[offset] = 0
   }
 
   public mutating func tick() {
@@ -63,6 +67,7 @@ public struct Board {
       y -= 1
     }
     closeBuriedGaps()
+    ageFire()
     step += 1
   }
 
@@ -169,7 +174,7 @@ public struct Board {
         return .found(y)
       }
       return .skip
-    case .sand:
+    case .sand, .fire:
       if seenOil {
         return .blocked
       }
@@ -207,10 +212,14 @@ public struct Board {
     }
     let incoming = drift[from]
     let outgoing = drift[to]
+    let incomingAge = age[from]
+    let outgoingAge = age[to]
     cells[from] = destination
     cells[to] = grain
     drift[from] = outgoing
     drift[to] = incoming
+    age[from] = outgoingAge
+    age[to] = incomingAge
     settleDrift(grain, slide: slide, to: to)
     settled[to] = true
     return true
@@ -228,6 +237,28 @@ public struct Board {
       return
     }
     drift[dest] = previous.drift[source]
+  }
+
+  private mutating func copyAge(from previous: Board, x: Int, y: Int) {
+    guard let source = previous.offset(x: x, y: y), let dest = offset(x: x, y: y) else {
+      return
+    }
+    age[dest] = previous.age[source]
+  }
+
+  private mutating func ageFire() {
+    var index = 0
+    while index < cells.count {
+      if cells[index] == .fire {
+        age[index] += 1
+        if age[index] >= FireMotion.lifetime {
+          cells[index] = .empty
+          drift[index] = 0
+          age[index] = 0
+        }
+      }
+      index += 1
+    }
   }
 
   private struct Gap {
@@ -356,7 +387,9 @@ public struct Board {
     while y >= stackTop {
       let moving = grain(x: x, y: y)
       let carried = driftAt(x: x, y: y)
+      let carriedAge = ageAt(x: x, y: y)
       place(x: x, y: y + length, grain: moving, drift: carried)
+      writeAge(x: x, y: y + length, age: carriedAge)
       place(x: x, y: y, grain: .empty, drift: 0)
       y -= 1
     }
@@ -369,11 +402,28 @@ public struct Board {
     return drift[index]
   }
 
+  private func ageAt(x: Int, y: Int) -> Int {
+    guard let index = offset(x: x, y: y) else {
+      return 0
+    }
+    return age[index]
+  }
+
+  private mutating func writeAge(x: Int, y: Int, age: Int) {
+    guard let index = offset(x: x, y: y) else {
+      return
+    }
+    self.age[index] = age
+  }
+
   private mutating func place(x: Int, y: Int, grain: Grain, drift: Int) {
     guard let index = offset(x: x, y: y) else {
       return
     }
     cells[index] = grain
     self.drift[index] = drift
+    if grain == .empty {
+      age[index] = 0
+    }
   }
 }

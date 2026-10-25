@@ -41,6 +41,15 @@ struct FramePainterTests {
   }
 
   @Test
+  func fireNamesTheBrush() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .fire)
+    let frame = FramePainter.paint(board, brush: .fire)
+    #expect(frame.glyphs[0].shape == .text("火"))
+    #expect(frame.glyphs[1].foreground == FramePainter.fire)
+  }
+
+  @Test
   func oilNamesTheBrush() {
     var board = Board(width: 1, height: 2)
     board.stamp(x: 0, y: 0, grain: .oil)
