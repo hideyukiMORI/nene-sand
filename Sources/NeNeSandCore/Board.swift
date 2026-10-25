@@ -150,6 +150,9 @@ public struct Board {
       return
     }
     let grain = cells[from]
+    if !acts(grain) {
+      return
+    }
     for slide in grain.slides(bias: bias) {
       if grain.flows() && !liquidMaySlide(slide, x: x, y: y, from: from) {
         continue
@@ -157,6 +160,15 @@ public struct Board {
       if shift(from: from, grain: grain, slide: slide, settled: &settled) {
         return
       }
+    }
+  }
+
+  private func acts(_ grain: Grain) -> Bool {
+    switch grain {
+    case .lava:
+      return LavaMotion.moves(on: step)
+    case .empty, .sand, .water, .oil, .fire, .wood:
+      return true
     }
   }
 
@@ -229,7 +241,7 @@ public struct Board {
         return .found(y)
       }
       return .skip
-    case .sand, .fire, .wood:
+    case .sand, .fire, .wood, .lava:
       if seenOil {
         return .blocked
       }
@@ -452,7 +464,7 @@ public struct Board {
 
   private func fallsIntoGaps(_ grain: Grain) -> Bool {
     switch grain {
-    case .sand, .water, .oil, .fire:
+    case .sand, .water, .oil, .fire, .lava:
       return true
     case .empty, .wood:
       return false

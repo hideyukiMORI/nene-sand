@@ -225,6 +225,50 @@ struct BoardTests {
   }
 
   @Test
+  func lavaFallsEveryOtherTick() {
+    var board = Board(width: 1, height: 5)
+    board.stamp(x: 0, y: 0, grain: .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 1) == .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 2) == .lava)
+  }
+
+  @Test
+  func sandSinksThroughLava() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .lava)
+    #expect(board.grain(x: 0, y: 1) == .sand)
+  }
+
+  @Test
+  func waterRestsOnLava() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .water)
+    board.stamp(x: 0, y: 1, grain: .lava)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .water)
+    #expect(board.grain(x: 0, y: 1) == .lava)
+  }
+
+  @Test
+  func lavaIgnitesOilAndWood() {
+    var board = Board(width: 3, height: 1)
+    board.stamp(x: 0, y: 0, grain: .oil)
+    board.stamp(x: 1, y: 0, grain: .lava)
+    board.stamp(x: 2, y: 0, grain: .wood)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .fire)
+    #expect(board.grain(x: 1, y: 0) == .lava)
+    #expect(board.grain(x: 2, y: 0) == .fire)
+  }
+
+  @Test
   func woodStaysInTheAir() {
     var board = Board(width: 1, height: 4)
     board.stamp(x: 0, y: 0, grain: .wood)

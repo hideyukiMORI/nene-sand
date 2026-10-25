@@ -51,7 +51,8 @@ struct AutomaticStrokeTests {
     #expect(AutomaticStroke.nextBrush(.water) == .oil)
     #expect(AutomaticStroke.nextBrush(.oil) == .fire)
     #expect(AutomaticStroke.nextBrush(.fire) == .wood)
-    #expect(AutomaticStroke.nextBrush(.wood) == .sand)
+    #expect(AutomaticStroke.nextBrush(.wood) == .lava)
+    #expect(AutomaticStroke.nextBrush(.lava) == .sand)
     #expect(AutomaticStroke.nextBrush(.empty) == .sand)
   }
 

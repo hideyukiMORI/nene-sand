@@ -41,6 +41,15 @@ struct FramePainterTests {
   }
 
   @Test
+  func lavaNamesTheBrush() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .lava)
+    let frame = FramePainter.paint(board, brush: .lava)
+    #expect(frame.glyphs[0].shape == .text("溶"))
+    #expect(frame.glyphs[1].foreground == FramePainter.lava)
+  }
+
+  @Test
   func woodNamesTheBrush() {
     var board = Board(width: 1, height: 2)
     board.stamp(x: 0, y: 0, grain: .wood)
