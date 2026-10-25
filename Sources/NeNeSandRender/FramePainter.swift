@@ -17,6 +17,7 @@ public enum FramePainter {
     public let width: Int
     public let theme: Theme
     public let progress: Progression
+    public let fireKnown: Bool
     public let earning: Bool
 
     public init(
@@ -26,6 +27,7 @@ public enum FramePainter {
       width: Int = 1,
       theme: Theme = .phosphor,
       progress: Progression = .beginning,
+      fireKnown: Bool = false,
       earning: Bool = false
     ) {
       self.automatic = automatic
@@ -34,6 +36,7 @@ public enum FramePainter {
       self.width = width
       self.theme = theme
       self.progress = progress
+      self.fireKnown = fireKnown
       self.earning = earning
     }
   }

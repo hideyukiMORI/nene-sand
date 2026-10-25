@@ -49,5 +49,6 @@ struct ProgressionTests {
     let oil = start.holding(Purse.zero.collecting(.lava).collecting(.wood)).buying(.oil)
     #expect(oil.following(.water) == .oil)
     #expect(oil.following(.oil) == .sand)
+    #expect(oil.following(.oil, fire: true) == .fire)
   }
 }
