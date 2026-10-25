@@ -176,7 +176,7 @@ public struct Board {
       return
     }
     for slide in grain.slides(bias: bias) {
-      if grain.flows() && !liquidMaySlide(slide, x: x, y: y, from: from) {
+      if grain.flows() && !liquidMaySlide(slide, x: x, y: y) {
         continue
       }
       if shift(from: from, grain: grain, slide: slide, settled: &settled) {
@@ -194,24 +194,43 @@ public struct Board {
     }
   }
 
-  private func liquidMaySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+  private func liquidMaySlide(_ slide: Slide, x: Int, y: Int) -> Bool {
     if slide.dy != 0 {
       return true
     }
-    if boundarySlide(slide, x: x, y: y, from: from) {
+    if boundarySlide(slide, x: x, y: y) {
       return true
     }
+    return levels(x, y, slide.dx)
+  }
+
+  private func levels(_ x: Int, _ y: Int, _ dx: Int) -> Bool {
     if y > 0 && grain(x: x, y: y - 1) != .empty {
       return false
     }
-    let toward = surface(x + slide.dx)
-    if !LiquidMotion.canLevel(from: surface(x), toward: toward) {
+    let from = surface(x)
+    let toward = surface(x + dx)
+    if LiquidMotion.canLevel(from: from, toward: toward) {
+      return true
+    }
+    if !LiquidMotion.oneLower(from: from, toward: toward) || liquidSupports(x + dx, y) {
       return false
     }
-    return LiquidMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+    guard let index = offset(x: x, y: y) else {
+      return false
+    }
+    return LiquidMotion.keepsCourse(drift: drift[index], dx: dx)
   }
 
-  private func boundarySlide(_ slide: Slide, x: Int, y: Int, from: Int) -> Bool {
+  private func liquidSupports(_ x: Int, _ y: Int) -> Bool {
+    let below = y + 1
+    if below >= height {
+      return false
+    }
+    return grain(x: x, y: below).flows()
+  }
+
+  private func boundarySlide(_ slide: Slide, x: Int, y: Int) -> Bool {
     if grain(x: x, y: y) != .water {
       return false
     }
@@ -219,10 +238,7 @@ public struct Board {
       return false
     }
     let neighbor = oilWaterLine(x + slide.dx)
-    if !LiquidMotion.canLevel(from: y, toward: neighbor) {
-      return false
-    }
-    return LiquidMotion.keepsCourse(drift: drift[from], dx: slide.dx)
+    return LiquidMotion.canLevel(from: y, toward: neighbor)
   }
 
   private enum LineLook {

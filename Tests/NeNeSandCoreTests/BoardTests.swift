@@ -116,6 +116,34 @@ struct BoardTests {
   }
 
   @Test
+  func oneStepOfWaterStaysPut() {
+    var board = Board(width: 2, height: 3)
+    board.stamp(x: 0, y: 2, grain: .sand)
+    board.stamp(x: 1, y: 2, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .water)
+    board.stamp(x: 1, y: 1, grain: .water)
+    board.stamp(x: 1, y: 0, grain: .water)
+    let before = grains(board)
+    board.tick()
+    board.tick()
+    #expect(grains(board) == before)
+  }
+
+  @Test
+  func twoStepWaterStepsDown() {
+    var board = Board(width: 2, height: 4)
+    board.stamp(x: 0, y: 3, grain: .sand)
+    board.stamp(x: 1, y: 3, grain: .sand)
+    board.stamp(x: 0, y: 2, grain: .water)
+    board.stamp(x: 1, y: 2, grain: .water)
+    board.stamp(x: 1, y: 1, grain: .water)
+    board.stamp(x: 1, y: 0, grain: .water)
+    board.tick()
+    #expect(board.grain(x: 1, y: 0) == .empty)
+    #expect(board.grain(x: 0, y: 1) == .water)
+  }
+
+  @Test
   func waterRestsOnSand() {
     var board = Board(width: 1, height: 2)
     board.stamp(x: 0, y: 0, grain: .water)
