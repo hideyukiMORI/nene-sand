@@ -6,6 +6,7 @@ public struct Board {
   private var age: [Int]
   private var step: Int
   public private(set) var stoneKnown: Bool
+  public private(set) var fireKnown: Bool
 
   public init(width: Int, height: Int) {
     let safeWidth = max(width, 0)
@@ -18,6 +19,7 @@ public struct Board {
     self.age = Array(repeating: 0, count: count)
     self.step = 0
     self.stoneKnown = false
+    self.fireKnown = false
   }
 
   public init(width: Int, height: Int, keeping previous: Board) {
@@ -40,6 +42,7 @@ public struct Board {
     }
     step = previous.step
     stoneKnown = previous.stoneKnown
+    fireKnown = previous.fireKnown
   }
 
   public func grain(x: Int, y: Int) -> Grain {
@@ -82,42 +85,45 @@ public struct Board {
   }
 
   private mutating func react() {
-    let products = reactionProducts()
+    let matched = matches()
     var index = 0
-    while index < products.count {
-      if let product = products[index] {
-        cells[index] = product
+    while index < matched.count {
+      if let rule = matched[index] {
+        cells[index] = rule.product
         drift[index] = 0
         age[index] = 0
-        remember(product)
+        remember(rule)
       }
       index += 1
     }
   }
 
-  private mutating func remember(_ product: Grain) {
-    if product == .stone {
+  private mutating func remember(_ rule: Reaction) {
+    if rule.product == .stone {
       stoneKnown = true
     }
+    if rule.source == .lava && rule.product == .fire {
+      fireKnown = true
+    }
   }
 
-  private func reactionProducts() -> [Grain?] {
-    var products: [Grain?] = Array(repeating: nil, count: cells.count)
+  private func matches() -> [Reaction?] {
+    var matched: [Reaction?] = Array(repeating: nil, count: cells.count)
     var index = 0
     while index < cells.count {
-      products[index] = product(at: index)
+      matched[index] = match(at: index)
       index += 1
     }
-    return products
+    return matched
   }
 
-  private func product(at index: Int) -> Grain? {
+  private func match(at index: Int) -> Reaction? {
     let target = cells[index]
     var row = 0
     while row < Reaction.rows.count {
       let rule = Reaction.rows[row]
       if rule.target == target && touches(index, source: rule.source) {
-        return rule.product
+        return rule
       }
       row += 1
     }

@@ -237,6 +237,9 @@ public enum Instrument {
     if grain == .stone {
       return marks.stone == .hidden
     }
+    if grain == .fire {
+      return !marks.fireKnown
+    }
     return !marks.progress.owns(grain)
   }
 

@@ -169,6 +169,14 @@ struct FramePainterTests {
     #expect(open.contains("oil"))
     #expect(!open.contains("40"))
     #expect(open.contains("4.."))
+    let lit = FramePainter.paint(
+      Board(width: 80, height: 2),
+      brush: .sand,
+      marks: FramePainter.Marks(fireKnown: true)
+    )
+    let fire = shown(lit, row: 1)
+    #expect(fire.contains("fire"))
+    #expect(!fire.contains("4.."))
   }
 
   @Test

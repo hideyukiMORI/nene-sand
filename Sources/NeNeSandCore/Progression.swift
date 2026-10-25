@@ -41,14 +41,21 @@ public struct Progression: Equatable, Sendable {
     )
   }
 
-  public func following(_ grain: Grain) -> Grain {
+  public func following(_ grain: Grain, fire: Bool = false) -> Grain {
     var next = AutomaticStroke.nextBrush(grain)
     var tries = 0
-    while !owns(next) && tries < 8 {
+    while !draws(next, fire: fire) && tries < 8 {
       next = AutomaticStroke.nextBrush(next)
       tries += 1
     }
     return next
+  }
+
+  private func draws(_ grain: Grain, fire: Bool) -> Bool {
+    if grain == .fire {
+      return fire
+    }
+    return owns(grain)
   }
 
   private let oil: Bool

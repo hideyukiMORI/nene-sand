@@ -80,6 +80,7 @@ struct SandLoop {
         width: scene.pen.reach * 2 + 1,
         theme: scene.pen.theme,
         progress: scene.progress,
+        fireKnown: current.fireKnown,
         earning: !scene.pen.freely
       )
     )
@@ -153,7 +154,7 @@ struct SandLoop {
     case .quit, .theme:
       return tuned(event, pen: pen)
     case .material(let key):
-      return chosen(pen, key: key, known: board.stoneKnown, progress: &progress)
+      return chosen(pen, key: key, known: learned(board), progress: &progress)
     case .clear:
       board.clear()
       var next = moved(pen, grain: pen.grain, stroke: nil)
@@ -164,7 +165,7 @@ struct SandLoop {
     case .brush(let delta):
       return sized(pen, delta: delta)
     case .freely:
-      return freed(pen, known: board.stoneKnown, progress: progress)
+      return freed(pen, known: learned(board), progress: progress)
     case .automatic:
       return Pen(
         grain: pen.grain,
@@ -223,7 +224,7 @@ struct SandLoop {
     let rows = board.height / 2
     guard let point = next.hand.next(width: board.width, height: rows) else {
       if next.handAt != nil {
-        next.grain = cycled(next, progress: progress)
+        next.grain = cycled(next, progress: progress, fire: board.fireKnown)
       }
       next.handAt = nil
       return next
@@ -272,10 +273,19 @@ struct SandLoop {
     var reach: Int
   }
 
+  private struct Known {
+    var stone: Bool
+    var fire: Bool
+  }
+
+  private func learned(_ board: Board) -> Known {
+    Known(stone: board.stoneKnown, fire: board.fireKnown)
+  }
+
   private func chosen(
     _ pen: Pen,
     key: BrushKey,
-    known: Bool,
+    known: Known,
     progress: inout Progression
   ) -> Pen {
     let grain = grain(for: key)
@@ -288,6 +298,16 @@ struct SandLoop {
     return held(pen, grain, known: known)
   }
 
+  private func held(_ pen: Pen, _ grain: Grain, known: Known) -> Pen {
+    if grain == .fire && !known.fire {
+      return pen
+    }
+    if grain == .stone && !known.stone {
+      return pen
+    }
+    return picked(pen, grain)
+  }
+
   private func forSale(_ key: BrushKey) -> Bool {
     switch key {
     case .oil, .wood, .lava:
@@ -295,16 +315,6 @@ struct SandLoop {
     case .sand, .water, .fire, .stone:
       return false
     }
-  }
-
-  private func held(_ pen: Pen, _ grain: Grain, known: Bool) -> Pen {
-    if grain == .fire {
-      return pen
-    }
-    if grain == .stone && !known {
-      return pen
-    }
-    return picked(pen, grain)
   }
 
   private func bought(_ pen: Pen, _ grain: Grain, progress: inout Progression) -> Pen {
@@ -325,7 +335,7 @@ struct SandLoop {
     return next
   }
 
-  private func freed(_ pen: Pen, known: Bool, progress: Progression) -> Pen {
+  private func freed(_ pen: Pen, known: Known, progress: Progression) -> Pen {
     var next = pen
     next.freely.toggle()
     if next.freely || keeps(next.grain, known: known, progress: progress) {
@@ -335,18 +345,21 @@ struct SandLoop {
     return next
   }
 
-  private func keeps(_ grain: Grain, known: Bool, progress: Progression) -> Bool {
+  private func keeps(_ grain: Grain, known: Known, progress: Progression) -> Bool {
     if grain == .stone {
-      return known
+      return known.stone
+    }
+    if grain == .fire {
+      return known.fire
     }
     return progress.owns(grain)
   }
 
-  private func cycled(_ pen: Pen, progress: Progression) -> Grain {
+  private func cycled(_ pen: Pen, progress: Progression, fire: Bool) -> Grain {
     if pen.freely {
       return AutomaticStroke.nextBrush(pen.grain)
     }
-    return progress.following(pen.grain)
+    return progress.following(pen.grain, fire: fire)
   }
 
   private func stoneMark(_ pen: Pen, known: Bool) -> FramePainter.StoneMark {
