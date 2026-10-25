@@ -18,8 +18,8 @@ struct FramePainterTests {
     let frame = FramePainter.paint(board, brush: .sand)
     let field = FramePainter.topRows
     #expect(frame.glyphs[field].shape == .upperHalf)
-    #expect(frame.glyphs[field].foreground == FramePainter.sand)
-    #expect(frame.glyphs[field].background == FramePainter.emptyColor)
+    #expect(frame.glyphs[field].foreground == Theme.sand)
+    #expect(frame.glyphs[field].background == Theme.phosphor.ground())
   }
 
   @Test
@@ -85,6 +85,33 @@ struct FramePainterTests {
   }
 
   @Test
+  func wideHelpNamesTheThemeKey() {
+    let frame = FramePainter.paint(Board(width: 100, height: 2), brush: .sand)
+    #expect(shown(frame, row: 6).contains("t theme"))
+  }
+
+  @Test
+  func amberRecolorsTheGroundAndKeepsSand() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    let frame = FramePainter.paint(
+      board,
+      brush: .sand,
+      marks: FramePainter.Marks(theme: .amber)
+    )
+    let field = frame.glyphs[FramePainter.topRows]
+    #expect(field.foreground == Theme.sand)
+    #expect(field.background == Theme.amber.ground())
+    #expect(Theme.amber.ground() != Theme.phosphor.ground())
+    let wide = FramePainter.paint(
+      Board(width: 80, height: 2),
+      brush: .sand,
+      marks: FramePainter.Marks(theme: .amber)
+    )
+    #expect(wide.glyphs.contains { $0.foreground == Theme.amber.accent() })
+  }
+
+  @Test
   func eachBrushNamesItself() {
     let voices: [(Grain, String)] = [
       (.water, "WATER"),
@@ -103,13 +130,13 @@ struct FramePainterTests {
   @Test
   func materialsColorTheField() {
     let samples: [(Grain, CellColor)] = [
-      (.sand, FramePainter.sand),
-      (.water, FramePainter.water),
-      (.oil, FramePainter.oil),
-      (.fire, FramePainter.fire),
-      (.wood, FramePainter.wood),
-      (.lava, FramePainter.lava),
-      (.stone, FramePainter.stone),
+      (.sand, Theme.sand),
+      (.water, Theme.water),
+      (.oil, Theme.oil),
+      (.fire, Theme.fire),
+      (.wood, Theme.wood),
+      (.lava, Theme.lava),
+      (.stone, Theme.stone),
     ]
     for sample in samples {
       var board = Board(width: 1, height: 2)

@@ -3,31 +3,20 @@ import NeNeSandCore
 public enum Instrument {
   public static func top(width: Int, brush: Grain, marks: FramePainter.Marks) -> [Glyph] {
     let wide = width >= Self.namedWidth
-    let open = marks.stone != .hidden
     let mode = mode(marks)
     return header(width, marks: marks, wide: wide)
-      + meter(width, brush: brush, open: open, wide: wide)
-      + lamps(width, mode: mode, wide: wide)
+      + meter(width, brush: brush, marks: marks)
+      + lamps(width, mode: mode, theme: marks.theme)
   }
 
   public static func bottom(width: Int, brush: Grain, marks: FramePainter.Marks) -> [Glyph] {
-    let wide = width >= Self.namedWidth
     let mode = mode(marks)
-    return status(width, brush: brush, mode: mode, wide: wide)
-      + aside(width, brush: brush, mode: mode, wide: wide)
-      + help(width, wide: wide)
+    return status(width, brush: brush, mode: mode, theme: marks.theme)
+      + aside(width, brush: brush, mode: mode, theme: marks.theme)
+      + help(width, theme: marks.theme)
   }
 
   private static let namedWidth = 76
-  private static let ground = FramePainter.emptyColor
-  private static let frame = CellColor(red: 43, green: 56, blue: 54)
-  private static let frameBright = CellColor(red: 65, green: 82, blue: 78)
-  private static let label = CellColor(red: 127, green: 163, blue: 154)
-  private static let paper = CellColor(red: 220, green: 232, blue: 227)
-  private static let amber = CellColor(red: 255, green: 181, blue: 71)
-  private static let cyan = CellColor(red: 92, green: 200, blue: 255)
-  private static let violet = CellColor(red: 183, green: 156, blue: 255)
-  private static let select = CellColor(red: 24, green: 33, blue: 31)
 
   private enum Mode {
     case quiet
@@ -56,105 +45,141 @@ public enum Instrument {
   }
 
   private static func header(_ width: Int, marks: FramePainter.Marks, wide: Bool) -> [Glyph] {
+    let ink = marks.theme.chrome
     let sweep: [Part] = [
-      .text("-=", frameBright, ground),
-      .text("#", FramePainter.phosphor, ground),
-      .text("=-", frameBright, ground),
+      .text("-=", ink.frameBright, ink.ground),
+      .text("#", ink.accent, ink.ground),
+      .text("=-", ink.frameBright, ink.ground),
     ]
     if wide {
-      return compose(title() + sweep + tail(marks), width: width)
+      return compose(title(marks.theme) + sweep + tail(marks), width: width, theme: marks.theme)
     }
+    let narrow = shortTitle(marks) + sweep
     return compose(
-      shortTitle(marks) + sweep + [.fill("-", frameBright), .text("  -\\", frameBright, ground)],
-      width: width)
+      narrow + [.fill("-", ink.frameBright), .text("  -\\", ink.frameBright, ink.ground)],
+      width: width,
+      theme: marks.theme
+    )
   }
 
-  private static func title() -> [Part] {
-    [
-      .text("/-< ", frameBright, ground),
-      .text("NENE", paper, ground),
-      .text("//", FramePainter.phosphor, ground),
-      .text("SAND", paper, ground),
-      .text(" >", frameBright, ground),
+  private static func title(_ theme: Theme) -> [Part] {
+    let ink = theme.chrome
+    return [
+      .text("/-< ", ink.frameBright, ink.ground),
+      .text("NENE", ink.paper, ink.ground),
+      .text("//", ink.accent, ink.ground),
+      .text("SAND", ink.paper, ink.ground),
+      .text(" >", ink.frameBright, ink.ground),
     ]
   }
 
   private static func shortTitle(_ marks: FramePainter.Marks) -> [Part] {
-    [.text("/-< brush ", label, ground)] + gauge(marks.width) + [.text(">", frameBright, ground)]
+    let ink = marks.theme.chrome
+    return [.text("/-< brush ", ink.label, ink.ground)] + gauge(marks.width, theme: marks.theme)
+      + [.text(">", ink.frameBright, ink.ground)]
   }
 
   private static func tail(_ marks: FramePainter.Marks) -> [Part] {
-    [.fill("-", frameBright), .text("  -< brush ", label, ground)]
-      + gauge(marks.width)
-      + [.text(">-\\", frameBright, ground)]
+    let ink = marks.theme.chrome
+    return [.fill("-", ink.frameBright), .text("  -< brush ", ink.label, ink.ground)]
+      + gauge(marks.width, theme: marks.theme)
+      + [.text(">-\\", ink.frameBright, ink.ground)]
   }
 
-  private static func meter(_ width: Int, brush: Grain, open: Bool, wide: Bool) -> [Glyph] {
-    compose(
-      [
-        .text("| ", frameBright, ground),
-        .cells(palette(brush, open: open, wide: wide)),
-        .fill(" ", frameBright),
-        .text(" |", frameBright, ground),
-      ], width: width)
-  }
-
-  private static func lamps(_ width: Int, mode: Mode, wide: Bool) -> [Glyph] {
-    let scale = wide ? "---:---|" : "---:"
+  private static func meter(_ width: Int, brush: Grain, marks: FramePainter.Marks) -> [Glyph] {
+    let ink = marks.theme.chrome
+    let wide = width >= namedWidth
     return compose(
       [
-        .text("\\-  -+", frameBright, ground),
-        .fill(scale, frameBright),
-        .text(" ", ground, ground),
-        .cells(lamp("hold", lit: mode == .hold, color: amber)),
-        .text("  ", ground, ground),
-        .cells(lamp("auto", lit: mode == .auto, color: cyan)),
-        .text("  ", ground, ground),
-        .cells(lamp("free", lit: mode == .free, color: violet)),
-        .text(" +-/", frameBright, ground),
-      ], width: width)
-  }
-
-  private static func status(_ width: Int, brush: Grain, mode: Mode, wide: Bool) -> [Glyph] {
-    let ink = tone(mode, brush: brush)
-    if wide {
-      return compose(
-        [
-          .text(" >> ", ink, ground),
-          .text(tag(mode, brush: brush), ink, ground),
-          .text(" :: ", frameBright, ground),
-          .text(line(mode, brush: brush), FramePainter.phosphor, ground),
-          .fill(" .", frameBright),
-          .cells(hint(mode)),
-        ], width: width)
-    }
-    return compose(
-      [
-        .text(">> ", ink, ground),
-        .text(tag(mode, brush: brush), ink, ground),
-        .text(" " + line(mode, brush: brush), FramePainter.phosphor, ground),
-        .fill(" ", frameBright),
-      ], width: width)
-  }
-
-  private static func aside(_ width: Int, brush: Grain, mode: Mode, wide: Bool) -> [Glyph] {
-    if wide {
-      return compose(
-        [
-          .text(" // " + joke(mode, brush: brush), label, ground),
-          .fill(" ", frameBright),
-          .text("_.-^-._.-^-._ ", frameBright, ground),
-        ], width: width)
-    }
-    return compose(
-      [.text(" ", ground, ground), .cells(keys(mouseKeys())), .fill(" ", frameBright)], width: width
+        .text("| ", ink.frameBright, ink.ground),
+        .cells(palette(brush, open: marks.stone != .hidden, wide: wide, theme: marks.theme)),
+        .fill(" ", ink.frameBright),
+        .text(" |", ink.frameBright, ink.ground),
+      ],
+      width: width,
+      theme: marks.theme
     )
   }
 
-  private static func help(_ width: Int, wide: Bool) -> [Glyph] {
-    let shown = wide ? keys(allKeys()) : keys(modeKeys())
+  private static func lamps(_ width: Int, mode: Mode, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    let scale = width >= namedWidth ? "---:---|" : "---:"
     return compose(
-      [.text(" ", ground, ground), .cells(shown), .fill(" ", frameBright)], width: width)
+      [
+        .text("\\-  -+", ink.frameBright, ink.ground),
+        .fill(scale, ink.frameBright),
+        .text(" ", ink.ground, ink.ground),
+        .cells(lamp("hold", lit: mode == .hold, color: ink.hold, theme: theme)),
+        .text("  ", ink.ground, ink.ground),
+        .cells(lamp("auto", lit: mode == .auto, color: ink.auto, theme: theme)),
+        .text("  ", ink.ground, ink.ground),
+        .cells(lamp("free", lit: mode == .free, color: ink.free, theme: theme)),
+        .text(" +-/", ink.frameBright, ink.ground),
+      ],
+      width: width,
+      theme: theme
+    )
+  }
+
+  private static func status(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    let voice = tone(mode, brush: brush, theme: theme)
+    if width >= namedWidth {
+      return compose(
+        [
+          .text(" >> ", voice, ink.ground),
+          .text(tag(mode, brush: brush), voice, ink.ground),
+          .text(" :: ", ink.frameBright, ink.ground),
+          .text(line(mode, brush: brush), ink.accent, ink.ground),
+          .fill(" .", ink.frameBright),
+          .cells(hint(mode, theme: theme)),
+        ],
+        width: width,
+        theme: theme
+      )
+    }
+    return compose(
+      [
+        .text(">> ", voice, ink.ground),
+        .text(tag(mode, brush: brush), voice, ink.ground),
+        .text(" " + line(mode, brush: brush), ink.accent, ink.ground),
+        .fill(" ", ink.frameBright),
+      ],
+      width: width,
+      theme: theme
+    )
+  }
+
+  private static func aside(_ width: Int, brush: Grain, mode: Mode, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    if width >= namedWidth {
+      return compose(
+        [
+          .text(" // " + joke(mode, brush: brush), ink.label, ink.ground),
+          .fill(" ", ink.frameBright),
+          .text("_.-^-._.-^-._ ", ink.frameBright, ink.ground),
+        ],
+        width: width,
+        theme: theme
+      )
+    }
+    return compose(
+      [.text(" ", ink.ground, ink.ground)] + keyParts(mouseKeys(), theme: theme)
+        + [.fill(" ", ink.frameBright)],
+      width: width,
+      theme: theme
+    )
+  }
+
+  private static func help(_ width: Int, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    let pairs = width >= namedWidth ? allKeys() : modeKeys()
+    return compose(
+      [.text(" ", ink.ground, ink.ground)] + keyParts(pairs, theme: theme)
+        + [.fill(" ", ink.frameBright)],
+      width: width,
+      theme: theme
+    )
   }
 
   private struct Sample {
@@ -165,65 +190,66 @@ public enum Instrument {
     let shut: Bool
   }
 
-  private static func palette(_ brush: Grain, open: Bool, wide: Bool) -> [Glyph] {
+  private static func palette(_ brush: Grain, open: Bool, wide: Bool, theme: Theme) -> [Glyph] {
     chip(
-      Sample(key: "1", name: "sand", color: FramePainter.sand, on: brush == .sand, shut: false),
-      wide: wide)
+      Sample(key: "1", name: "sand", color: Theme.sand, on: brush == .sand, shut: false),
+      wide: wide, theme: theme)
       + chip(
-        Sample(
-          key: "2", name: "water", color: FramePainter.water, on: brush == .water, shut: false),
-        wide: wide)
+        Sample(key: "2", name: "water", color: Theme.water, on: brush == .water, shut: false),
+        wide: wide, theme: theme)
       + chip(
-        Sample(key: "3", name: "oil", color: FramePainter.oil, on: brush == .oil, shut: false),
-        wide: wide)
+        Sample(key: "3", name: "oil", color: Theme.oil, on: brush == .oil, shut: false),
+        wide: wide, theme: theme)
       + chip(
-        Sample(key: "4", name: "fire", color: FramePainter.fire, on: brush == .fire, shut: false),
-        wide: wide)
+        Sample(key: "4", name: "fire", color: Theme.fire, on: brush == .fire, shut: false),
+        wide: wide, theme: theme)
       + chip(
-        Sample(key: "5", name: "wood", color: FramePainter.wood, on: brush == .wood, shut: false),
-        wide: wide)
+        Sample(key: "5", name: "wood", color: Theme.wood, on: brush == .wood, shut: false),
+        wide: wide, theme: theme)
       + chip(
-        Sample(key: "6", name: "lava", color: FramePainter.lava, on: brush == .lava, shut: false),
-        wide: wide)
+        Sample(key: "6", name: "lava", color: Theme.lava, on: brush == .lava, shut: false),
+        wide: wide, theme: theme)
       + chip(
-        Sample(
-          key: "7", name: "stone", color: FramePainter.stone, on: brush == .stone, shut: !open),
-        wide: wide)
+        Sample(key: "7", name: "stone", color: Theme.stone, on: brush == .stone, shut: !open),
+        wide: wide, theme: theme)
   }
 
-  private static func chip(_ sample: Sample, wide: Bool) -> [Glyph] {
-    let paper = sample.on ? select : ground
+  private static func chip(_ sample: Sample, wide: Bool, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    let bed = sample.on ? ink.select : ink.ground
     let sampleCells =
-      sample.shut ? letters("..", foreground: label, background: paper) : swatch(sample.color)
-    var cells = letters(sample.on ? "[" : " ", foreground: Self.paper, background: ground)
-    cells.append(contentsOf: letters(sample.key, foreground: keyInk(sample), background: paper))
+      sample.shut ? letters("..", foreground: ink.label, background: bed) : swatch(sample.color)
+    var cells = letters(sample.on ? "[" : " ", foreground: ink.paper, background: ink.ground)
+    cells.append(
+      contentsOf: letters(sample.key, foreground: keyInk(sample, theme: theme), background: bed))
     cells.append(contentsOf: sampleCells)
     if wide {
-      let nameInk = sample.on ? Self.paper : label
-      cells.append(contentsOf: letters(" " + sample.name, foreground: nameInk, background: paper))
+      let nameInk = sample.on ? ink.paper : ink.label
+      cells.append(contentsOf: letters(" " + sample.name, foreground: nameInk, background: bed))
     }
     cells.append(
-      contentsOf: letters(sample.on ? "]" : " ", foreground: Self.paper, background: ground))
+      contentsOf: letters(sample.on ? "]" : " ", foreground: ink.paper, background: ink.ground))
     return cells
   }
 
-  private static func keyInk(_ sample: Sample) -> CellColor {
+  private static func keyInk(_ sample: Sample, theme: Theme) -> CellColor {
     if sample.on {
-      return FramePainter.phosphor
+      return theme.chrome.accent
     }
     if sample.shut {
-      return label
+      return theme.chrome.label
     }
-    return paper
+    return theme.chrome.paper
   }
 
-  private static func gauge(_ width: Int) -> [Part] {
+  private static func gauge(_ width: Int, theme: Theme) -> [Part] {
+    let ink = theme.chrome
     let lit = hashes(width)
     return [
-      .text("|", frameBright, ground),
-      .text(String(repeating: "#", count: lit), paper, ground),
-      .text(String(repeating: ".", count: 3 - lit), frameBright, ground),
-      .text("| \(width) ", paper, ground),
+      .text("|", ink.frameBright, ink.ground),
+      .text(String(repeating: "#", count: lit), ink.paper, ink.ground),
+      .text(String(repeating: ".", count: 3 - lit), ink.frameBright, ink.ground),
+      .text("| \(width) ", ink.paper, ink.ground),
     ]
   }
 
@@ -237,43 +263,45 @@ public enum Instrument {
     return 1
   }
 
-  private static func lamp(_ name: String, lit: Bool, color: CellColor) -> [Glyph] {
+  private static func lamp(_ name: String, lit: Bool, color: CellColor, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
     if lit {
-      return letters("#" + name.uppercased(), foreground: color, background: ground)
+      return letters("#" + name.uppercased(), foreground: color, background: ink.ground)
     }
-    return letters(".", foreground: frameBright, background: ground)
-      + letters(name, foreground: label, background: ground)
+    return letters(".", foreground: ink.frameBright, background: ink.ground)
+      + letters(name, foreground: ink.label, background: ink.ground)
   }
 
-  private static func hint(_ mode: Mode) -> [Glyph] {
+  private static func hint(_ mode: Mode, theme: Theme) -> [Glyph] {
     switch mode {
     case .quiet:
       return []
     case .hold:
-      return cue("space", "resume")
+      return cue("space", "resume", theme: theme)
     case .auto:
-      return cue("a", "stop")
+      return cue("a", "stop", theme: theme)
     case .free:
-      return cue("m", "leave")
+      return cue("m", "leave", theme: theme)
     }
   }
 
-  private static func cue(_ key: String, _ word: String) -> [Glyph] {
-    letters(" ", foreground: ground, background: ground)
-      + letters(key, foreground: paper, background: ground)
-      + letters(" " + word, foreground: label, background: ground)
+  private static func cue(_ key: String, _ word: String, theme: Theme) -> [Glyph] {
+    let ink = theme.chrome
+    return letters(" ", foreground: ink.ground, background: ink.ground)
+      + letters(key, foreground: ink.paper, background: ink.ground)
+      + letters(" " + word, foreground: ink.label, background: ink.ground)
   }
 
-  private static func tone(_ mode: Mode, brush: Grain) -> CellColor {
+  private static func tone(_ mode: Mode, brush: Grain, theme: Theme) -> CellColor {
     switch mode {
     case .quiet:
-      return grainColor(brush)
+      return grainColor(brush, theme: theme)
     case .hold:
-      return amber
+      return theme.chrome.hold
     case .auto:
-      return cyan
+      return theme.chrome.auto
     case .free:
-      return violet
+      return theme.chrome.free
     }
   }
 
@@ -379,24 +407,24 @@ public enum Instrument {
     }
   }
 
-  private static func grainColor(_ grain: Grain) -> CellColor {
+  private static func grainColor(_ grain: Grain, theme: Theme) -> CellColor {
     switch grain {
     case .empty:
-      return ground
+      return theme.ground()
     case .sand:
-      return FramePainter.sand
+      return Theme.sand
     case .water:
-      return FramePainter.water
+      return Theme.water
     case .oil:
-      return FramePainter.oil
+      return Theme.oil
     case .fire:
-      return FramePainter.fire
+      return Theme.fire
     case .wood:
-      return FramePainter.wood
+      return Theme.wood
     case .lava:
-      return FramePainter.lava
+      return Theme.lava
     case .stone:
-      return FramePainter.stone
+      return Theme.stone
     }
   }
 
@@ -405,25 +433,28 @@ public enum Instrument {
   }
 
   private static func modeKeys() -> [(String, String)] {
-    [("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free")]
+    [("space", "hold"), ("[ ]", "brush"), ("a", "auto"), ("m", "free"), ("t", "theme")]
   }
 
   private static func allKeys() -> [(String, String)] {
     mouseKeys() + modeKeys()
   }
 
-  private static func keys(_ pairs: [(String, String)]) -> [Glyph] {
-    var cells: [Glyph] = []
+  private static func keyParts(_ pairs: [(String, String)], theme: Theme) -> [Part] {
+    let ink = theme.chrome
+    var parts: [Part] = []
     var index = 0
     while index < pairs.count {
-      cells.append(contentsOf: letters(pairs[index].0, foreground: paper, background: ground))
-      cells.append(contentsOf: letters(" " + pairs[index].1, foreground: label, background: ground))
+      let pair =
+        letters(pairs[index].0, foreground: ink.paper, background: ink.ground)
+        + letters(" " + pairs[index].1, foreground: ink.label, background: ink.ground)
+      parts.append(.cells(pair))
       if index + 1 < pairs.count {
-        cells.append(contentsOf: letters("  ", foreground: ground, background: ground))
+        parts.append(.text("  ", ink.ground, ink.ground))
       }
       index += 1
     }
-    return cells
+    return parts
   }
 
   private static func swatch(_ color: CellColor) -> [Glyph] {
@@ -441,7 +472,7 @@ public enum Instrument {
     return cells
   }
 
-  private static func compose(_ parts: [Part], width: Int) -> [Glyph] {
+  private static func compose(_ parts: [Part], width: Int, theme: Theme) -> [Glyph] {
     let room = max(0, width - fixed(parts))
     let fills = fillCount(parts)
     var glyphs: [Glyph] = []
@@ -460,11 +491,14 @@ public enum Instrument {
       case .fill(let pattern, let ink):
         let count = share(room, fills: fills, index: fillIndex)
         fillIndex += 1
-        take(painted(pattern, count: count, ink: ink), into: &glyphs, width: width)
+        take(
+          painted(pattern, count: count, ink: ink, bed: theme.chrome.ground), into: &glyphs,
+          width: width)
       }
     }
     while glyphs.count < width {
-      glyphs.append(Glyph(shape: .blank, foreground: ground, background: ground))
+      glyphs.append(
+        Glyph(shape: .blank, foreground: theme.chrome.ground, background: theme.chrome.ground))
     }
     return glyphs
   }
@@ -511,13 +545,15 @@ public enum Instrument {
     glyphs.append(contentsOf: cells)
   }
 
-  private static func painted(_ pattern: String, count: Int, ink: CellColor) -> [Glyph] {
+  private static func painted(_ pattern: String, count: Int, ink: CellColor, bed: CellColor)
+    -> [Glyph]
+  {
     let chars = Array(pattern)
     var cells: [Glyph] = []
     var index = 0
     while index < count {
       cells.append(
-        Glyph(shape: .text(chars[index % chars.count]), foreground: ink, background: ground))
+        Glyph(shape: .text(chars[index % chars.count]), foreground: ink, background: bed))
       index += 1
     }
     return cells

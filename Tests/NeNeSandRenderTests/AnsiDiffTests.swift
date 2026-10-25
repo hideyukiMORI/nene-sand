@@ -13,8 +13,8 @@ struct AnsiDiffTests {
   func textGlyphIsWritten() {
     let mark = Glyph(
       shape: .text("水"),
-      foreground: FramePainter.water,
-      background: FramePainter.emptyColor
+      foreground: Theme.water,
+      background: Theme.phosphor.ground()
     )
     let frame = Frame(width: 1, height: 1, glyphs: [mark])
     let text = AnsiDiff.text(previous: nil, next: frame, trueColor: true)
@@ -29,6 +29,7 @@ struct AnsiDiffTests {
   }
 
   private var blank: Glyph {
-    Glyph(shape: .blank, foreground: FramePainter.emptyColor, background: FramePainter.emptyColor)
+    Glyph(
+      shape: .blank, foreground: Theme.phosphor.ground(), background: Theme.phosphor.ground())
   }
 }
