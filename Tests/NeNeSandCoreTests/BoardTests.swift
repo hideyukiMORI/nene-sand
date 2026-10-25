@@ -158,6 +158,49 @@ struct BoardTests {
   }
 
   @Test
+  func woodStaysInTheAir() {
+    var board = Board(width: 1, height: 4)
+    board.stamp(x: 0, y: 0, grain: .wood)
+    board.tick()
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .wood)
+    #expect(board.count(of: .wood) == 1)
+  }
+
+  @Test
+  func sandRestsOnWood() {
+    var board = Board(width: 1, height: 2)
+    board.stamp(x: 0, y: 0, grain: .sand)
+    board.stamp(x: 0, y: 1, grain: .wood)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .sand)
+    #expect(board.grain(x: 0, y: 1) == .wood)
+  }
+
+  @Test
+  func woodDoesNotFallIntoABuriedGap() {
+    var board = Board(width: 1, height: 4)
+    board.stamp(x: 0, y: 0, grain: .wood)
+    board.stamp(x: 0, y: 3, grain: .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .wood)
+    #expect(board.grain(x: 0, y: 1) == .empty)
+    #expect(board.grain(x: 0, y: 2) == .empty)
+  }
+
+  @Test
+  func sandAboveWoodStillFillsTheGapBelow() {
+    var board = Board(width: 1, height: 4)
+    board.stamp(x: 0, y: 0, grain: .wood)
+    board.stamp(x: 0, y: 1, grain: .sand)
+    board.stamp(x: 0, y: 3, grain: .sand)
+    board.tick()
+    #expect(board.grain(x: 0, y: 0) == .wood)
+    #expect(board.grain(x: 0, y: 1) == .empty)
+    #expect(board.grain(x: 0, y: 2) == .sand)
+  }
+
+  @Test
   func fireWobblesUpLeftOnEvenTick() {
     var board = Board(width: 3, height: 4)
     board.stamp(x: 1, y: 3, grain: .fire)

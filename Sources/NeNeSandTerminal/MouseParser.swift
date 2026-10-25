@@ -51,6 +51,9 @@ public struct MouseParser {
     if byte == UInt8(ascii: "4") {
       return .material(.fire)
     }
+    if byte == UInt8(ascii: "5") {
+      return .material(.wood)
+    }
     if byte == UInt8(ascii: "a") || byte == UInt8(ascii: "A") {
       return .automatic
     }

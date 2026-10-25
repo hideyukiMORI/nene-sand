@@ -5,6 +5,7 @@ public enum FramePainter {
   public static let water = CellColor(red: 64, green: 156, blue: 214)
   public static let oil = CellColor(red: 168, green: 124, blue: 36)
   public static let fire = CellColor(red: 228, green: 88, blue: 32)
+  public static let wood = CellColor(red: 112, green: 78, blue: 42)
   public static let emptyColor = CellColor(red: 16, green: 18, blue: 22)
 
   public static func paint(_ board: Board, brush: Grain, automatic: Bool = false) -> Frame {
@@ -81,6 +82,8 @@ public enum FramePainter {
       return "油"
     case .fire:
       return "火"
+    case .wood:
+      return "木"
     }
   }
 
@@ -96,6 +99,8 @@ public enum FramePainter {
       return oil
     case .fire:
       return fire
+    case .wood:
+      return wood
     }
   }
 }
