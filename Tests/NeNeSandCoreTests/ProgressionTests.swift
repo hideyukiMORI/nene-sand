@@ -51,4 +51,22 @@ struct ProgressionTests {
     #expect(oil.following(.oil) == .sand)
     #expect(oil.following(.oil, fire: true) == .fire)
   }
+
+  @Test
+  func faucetCostsSixtyOnce() {
+    let poor = Progression.beginning.buyingFaucet()
+    #expect(!poor.ownsFaucet())
+    #expect(poor.faucetCost() == 60)
+    #expect(poor.purse.amount == 0)
+    let purse = Purse.zero.collecting(.lava).collecting(.lava)
+    let once = Progression.beginning.holding(purse).buyingFaucet()
+    #expect(once.ownsFaucet())
+    #expect(once.faucetCost() == nil)
+    #expect(once.purse.amount == 4)
+    let twice = once.buyingFaucet()
+    #expect(twice.purse.amount == 4)
+    let later = twice.holding(Purse.zero.collecting(.lava).collecting(.wood)).buying(.oil)
+    #expect(later.owns(.oil))
+    #expect(later.ownsFaucet())
+  }
 }

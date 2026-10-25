@@ -98,7 +98,8 @@ struct SandLoop {
     switch event {
     case .quit:
       return true
-    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely, .theme:
+    case .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely,
+      .theme, .faucet:
       return false
     }
   }
@@ -111,6 +112,9 @@ struct SandLoop {
     board = gathered.board
     progress = progress.holding(gathered.purse)
     board.tick()
+    if !pen.freely && progress.ownsFaucet() {
+      board = Faucet.drip(board)
+    }
   }
 
   private func earned(_ board: Board, pen: Pen, purse: Purse) -> Collector.Gathering {
@@ -151,8 +155,8 @@ struct SandLoop {
     progress: inout Progression
   ) -> Pen {
     switch event {
-    case .quit, .theme:
-      return tuned(event, pen: pen)
+    case .quit, .theme, .faucet:
+      return tuned(event, pen: pen, progress: &progress)
     case .material(let key):
       return chosen(pen, key: key, known: learned(board), progress: &progress)
     case .clear:
@@ -204,10 +208,12 @@ struct SandLoop {
     )
   }
 
-  private func tuned(_ event: TerminalEvent, pen: Pen) -> Pen {
+  private func tuned(_ event: TerminalEvent, pen: Pen, progress: inout Progression) -> Pen {
     switch event {
     case .theme:
       return recolored(pen)
+    case .faucet:
+      return boughtFaucet(pen, progress: &progress)
     case .quit, .press, .drag, .release, .material, .automatic, .clear, .pause, .brush, .freely:
       return pen
     }
@@ -315,6 +321,13 @@ struct SandLoop {
     case .sand, .water, .fire, .stone:
       return false
     }
+  }
+
+  private func boughtFaucet(_ pen: Pen, progress: inout Progression) -> Pen {
+    if !pen.freely {
+      progress = progress.buyingFaucet()
+    }
+    return pen
   }
 
   private func bought(_ pen: Pen, _ grain: Grain, progress: inout Progression) -> Pen {

@@ -15,4 +15,5 @@ public enum TerminalEvent: Equatable, Sendable {
   case brush(Int)
   case freely
   case theme
+  case faucet
 }

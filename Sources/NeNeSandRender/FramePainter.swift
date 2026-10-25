@@ -68,14 +68,28 @@ public enum FramePainter {
     let top = board.grain(x: column, y: row * 2)
     let bottom = board.grain(x: column, y: row * 2 + 1)
     let mouth = openMouth(board, column: column, row: row, marks: marks)
-    if top == .empty && bottom == .empty && !mouth {
+    let spout = openSpout(board, column: column, row: row, marks: marks)
+    if top == .empty && bottom == .empty && !mouth && !spout {
       return blank(marks.theme)
     }
     return Glyph(
       shape: .upperHalf,
-      foreground: marks.theme.ink(top),
+      foreground: face(top, spout: spout, theme: marks.theme),
       background: bed(bottom, mouth: mouth, theme: marks.theme)
     )
+  }
+
+  private static func openSpout(_ board: Board, column: Int, row: Int, marks: Marks) -> Bool {
+    marks.earning
+      && marks.progress.ownsFaucet()
+      && Faucet.isSpout(x: column, y: row * 2, width: board.width, height: board.height)
+  }
+
+  private static func face(_ grain: Grain, spout: Bool, theme: Theme) -> CellColor {
+    if spout && grain == .empty {
+      return theme.accent()
+    }
+    return theme.ink(grain)
   }
 
   private static func openMouth(_ board: Board, column: Int, row: Int, marks: Marks) -> Bool {
