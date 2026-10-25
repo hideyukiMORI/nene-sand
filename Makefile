@@ -10,6 +10,7 @@ check: .tools/swiftlint
 	python3 eng/run_tests.py
 	python3 eng/commit_message.py --check
 	python3 eng/run_build.py
+	python3 eng/run_swift_tests.py
 	python3 eng/run_format.py
 	python3 eng/run_lint.py
 

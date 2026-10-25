@@ -22,7 +22,7 @@ def main() -> int:
         print("SWF-012: .tools/swiftlint が無い。make check が eng/tool-versions.txt から取得する")
         return 1
     completed = subprocess.run(
-        [str(binary), "lint", "--strict", "--config", ".swiftlint.yml", "Sources"],
+        [str(binary), "lint", "--strict", "--config", ".swiftlint.yml", "Sources", "Tests"],
         capture_output=True,
         text=True,
     )
